@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/soundtrackyourbrand/utils/gae/gaecontext"
 	"github.com/soundtrackyourbrand/utils/web/httpcontext"
+	"github.com/zond/gitis/common"
 	"github.com/zond/gitis/controller"
 	"io"
 	"net/http"
@@ -64,9 +65,12 @@ func handleStatic(router *mux.Router, dir string) {
 func init() {
 	router := mux.NewRouter()
 
-	router.PathPrefix("/").Methods("GET").Handler(gaecontext.HTTPHandlerFunc(controller.Index))
+	router.Path("/js/{ver}/all.js").Handler(common.HandlerFunc(controller.AllJS))
+	router.Path("/css/{ver}/all.css").Handler(common.HandlerFunc(controller.AllCSS))
 
 	handleStatic(router, "static")
+
+	router.PathPrefix("/").Methods("GET").Handler(common.HandlerFunc(controller.Index))
 
 	http.Handle("/", router)
 }

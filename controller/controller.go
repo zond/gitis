@@ -3,7 +3,7 @@ package controller
 import (
 	"bytes"
 	"fmt"
-	"github.com/soundtrackyourbrand/utils/gae/gaecontext"
+	"github.com/zond/gitis/common"
 	"strings"
 	"text/template"
 )
@@ -16,7 +16,7 @@ var _Templates = template.Must(template.New("_Templates").ParseGlob("templates/_
 var jsTemplates = template.Must(template.New("jsTemplates").ParseGlob("templates/js/*.js"))
 var cssTemplates = template.Must(template.New("cssTemplates").ParseGlob("templates/css/*.css"))
 
-func allCSS(c gaecontext.HTTPContext) {
+func AllCSS(c common.Context) {
 	c.SetContentType("text/css; charset=UTF-8")
 	renderText(c, cssTemplates, "bootstrap.min.css")
 	renderText(c, cssTemplates, "bootstrap-theme.min.css")
@@ -24,13 +24,13 @@ func allCSS(c gaecontext.HTTPContext) {
 	renderText(c, cssTemplates, "common.css")
 }
 
-func renderText(c gaecontext.HTTPContext, templates *template.Template, template string) {
+func renderText(c common.Context, templates *template.Template, template string) {
 	if err := templates.ExecuteTemplate(c.Resp(), template, c); err != nil {
 		panic(fmt.Errorf("While rendering text: %v", err))
 	}
 }
 
-func render_Templates(c gaecontext.HTTPContext) {
+func render_Templates(c common.Context) {
 	fmt.Fprintln(c.Resp(), "(function() {")
 	fmt.Fprintln(c.Resp(), "  var n;")
 	var buf *bytes.Buffer
@@ -53,15 +53,12 @@ func render_Templates(c gaecontext.HTTPContext) {
 	fmt.Fprintln(c.Resp(), "})();")
 }
 
-func allJS(c gaecontext.HTTPContext) {
+func AllJS(c common.Context) {
 	c.SetContentType("application/javascript; charset=UTF-8")
 	renderText(c, jsTemplates, "jquery-2.0.3.min.js")
 	renderText(c, jsTemplates, "underscore-min.js")
 	renderText(c, jsTemplates, "backbone-min.js")
 	renderText(c, jsTemplates, "bootstrap.min.js")
-	renderText(c, jsTemplates, "bootstrap-multiselect.js")
-	renderText(c, jsTemplates, "viz.js")
-	renderText(c, jsTemplates, "tinycolor.js")
 	render_Templates(c)
 	for _, templ := range jsModelTemplates.Templates() {
 		if err := templ.Execute(c.Resp(), c); err != nil {
@@ -81,7 +78,7 @@ func allJS(c gaecontext.HTTPContext) {
 	renderText(c, jsTemplates, "app.js")
 }
 
-func Index(c gaecontext.HTTPContext) {
+func Index(c common.Context) {
 	c.SetContentType("text/html; charset=UTF-8")
 	renderText(c, htmlTemplates, "index.html")
 
