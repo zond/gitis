@@ -9,6 +9,10 @@ window.TopNavigationView = Backbone.View.extend({
 			  url: '/',
 				label: 'About',
 			},
+			{
+			  url: '/projects',
+				label: 'Projects',
+			},
 		];
 		this.activeUrl = null;
 		this.listenTo(window.session.user, 'change', this.render);

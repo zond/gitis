@@ -22,11 +22,16 @@ $(window).load(function() {
 
 		routes: {
 			"": "about",
+			"projects": "projects",
 			"*all": "about",
 		},
 
 		about: function() {
 			this.render(new AboutView({}));
+		},
+
+		projects: function() {
+		  this.render(new ProjectsView({}));
 		},
 	});	
 	
