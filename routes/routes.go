@@ -1,10 +1,9 @@
 package routes
 
 import (
+	"common"
 	"github.com/gorilla/mux"
-	"github.com/soundtrackyourbrand/utils/gae/gaecontext"
 	"github.com/soundtrackyourbrand/utils/web/httpcontext"
-	"github.com/zond/gitis/common"
 	"github.com/zond/gitis/controller"
 	"io"
 	"net/http"
@@ -14,11 +13,11 @@ import (
 )
 
 func wantsJSON(r *http.Request, m *mux.RouteMatch) bool {
-	return httpcontext.MostAccepted(r, "text/html", "Accept") == "application/json"
+	return httpcontext.MostAccepted(r, "Accept", "text/html") == "application/json"
 }
 
 func wantsHTML(r *http.Request, m *mux.RouteMatch) bool {
-	return httpcontext.MostAccepted(r, "text/html", "Accept") == "text/html"
+	return httpcontext.MostAccepted(r, "Accept", "text/html") == "text/html"
 }
 
 func handleStatic(router *mux.Router, dir string) {
@@ -34,7 +33,7 @@ func handleStatic(router *mux.Router, dir string) {
 		cpy := fil
 		router.MatcherFunc(func(r *http.Request, rm *mux.RouteMatch) bool {
 			return strings.HasSuffix(r.URL.Path, cpy)
-		}).Handler(gaecontext.HTTPHandlerFunc(func(c gaecontext.HTTPContext) {
+		}).Handler(httpcontext.HandlerFunc(func(c httpcontext.HTTPContextLogger) (err error) {
 			if strings.HasSuffix(c.Req().URL.Path, ".css") {
 				c.SetContentType("text/css; charset=UTF-8")
 			} else if strings.HasSuffix(c.Req().URL.Path, ".js") {
@@ -50,14 +49,13 @@ func handleStatic(router *mux.Router, dir string) {
 			} else {
 				c.SetContentType("application/octet-stream")
 			}
-			if in, err := os.Open(filepath.Join("static", cpy)); err != nil {
-				c.Resp().WriteHeader(500)
-			} else {
-				defer in.Close()
-				if _, err := io.Copy(c.Resp(), in); err != nil {
-					c.Resp().WriteHeader(500)
-				}
+			var in *os.File
+			if in, err = os.Open(filepath.Join("static", cpy)); err != nil {
+				return
 			}
+			defer in.Close()
+			_, err = io.Copy(c.Resp(), in)
+			return
 		}))
 	}
 }
@@ -65,12 +63,18 @@ func handleStatic(router *mux.Router, dir string) {
 func init() {
 	router := mux.NewRouter()
 
-	router.Path("/js/{ver}/all.js").Handler(common.HandlerFunc(controller.AllJS))
-	router.Path("/css/{ver}/all.css").Handler(common.HandlerFunc(controller.AllCSS))
+	router.Path("/js/{ver}/all.js").Handler(common.HTTPHandlerFunc(controller.AllJS))
+	router.Path("/css/{ver}/all.css").Handler(common.HTTPHandlerFunc(controller.AllCSS))
+
+	router.Path("/user").MatcherFunc(wantsJSON).Handler(common.JSONHandlerFunc(controller.User))
+
+	router.Path("/login").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.Login))
+	router.Path("/logout").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.Logout))
+	router.Path("/oauth").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.OAuth))
 
 	handleStatic(router, "static")
 
-	router.PathPrefix("/").Methods("GET").Handler(common.HandlerFunc(controller.Index))
+	router.PathPrefix("/").MatcherFunc(wantsHTML).Methods("GET").Handler(common.HTTPHandlerFunc(controller.Index))
 
 	http.Handle("/", router)
 }

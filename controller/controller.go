@@ -1,11 +1,19 @@
 package controller
 
 import (
+	"appengine/urlfetch"
 	"bytes"
+	"common"
 	"fmt"
-	"github.com/zond/gitis/common"
+	"github.com/soundtrackyourbrand/utils/web/jsoncontext"
+	"io"
+	"model"
+	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"text/template"
+	"time"
 )
 
 var htmlTemplates = template.Must(template.New("htmlTemplates").ParseGlob("templates/html/*.html"))
@@ -16,21 +24,23 @@ var _Templates = template.Must(template.New("_Templates").ParseGlob("templates/_
 var jsTemplates = template.Must(template.New("jsTemplates").ParseGlob("templates/js/*.js"))
 var cssTemplates = template.Must(template.New("cssTemplates").ParseGlob("templates/css/*.css"))
 
-func AllCSS(c common.Context) {
+func AllCSS(c common.HTTPContext) (err error) {
 	c.SetContentType("text/css; charset=UTF-8")
-	renderText(c, cssTemplates, "bootstrap.min.css")
-	renderText(c, cssTemplates, "bootstrap-theme.min.css")
-	renderText(c, cssTemplates, "bootstrap-multiselect.css")
-	renderText(c, cssTemplates, "common.css")
-}
-
-func renderText(c common.Context, templates *template.Template, template string) {
-	if err := templates.ExecuteTemplate(c.Resp(), template, c); err != nil {
-		panic(fmt.Errorf("While rendering text: %v", err))
+	if err = renderText(c, cssTemplates, "bootstrap.min.css"); err != nil {
+		return
 	}
+	if err = renderText(c, cssTemplates, "bootstrap-theme.min.css"); err != nil {
+		return
+	}
+	err = renderText(c, cssTemplates, "common.css")
+	return
 }
 
-func render_Templates(c common.Context) {
+func renderText(c common.HTTPContext, templates *template.Template, template string) error {
+	return templates.ExecuteTemplate(c.Resp(), template, c)
+}
+
+func render_Templates(c common.HTTPContext) error {
 	fmt.Fprintln(c.Resp(), "(function() {")
 	fmt.Fprintln(c.Resp(), "  var n;")
 	var buf *bytes.Buffer
@@ -40,7 +50,7 @@ func render_Templates(c common.Context) {
 		fmt.Fprintf(c.Resp(), "  n.text('")
 		buf = new(bytes.Buffer)
 		if err := templ.Execute(buf, c); err != nil {
-			panic(err)
+			return err
 		}
 		rendered = string(buf.Bytes())
 		rendered = strings.Replace(rendered, "\\", "\\\\", -1)
@@ -51,35 +61,129 @@ func render_Templates(c common.Context) {
 		fmt.Fprintln(c.Resp(), "  $('head').append(n);")
 	}
 	fmt.Fprintln(c.Resp(), "})();")
+	return nil
 }
 
-func AllJS(c common.Context) {
+func AllJS(c common.HTTPContext) (err error) {
 	c.SetContentType("application/javascript; charset=UTF-8")
-	renderText(c, jsTemplates, "jquery-2.0.3.min.js")
-	renderText(c, jsTemplates, "underscore-min.js")
-	renderText(c, jsTemplates, "backbone-min.js")
-	renderText(c, jsTemplates, "bootstrap.min.js")
-	render_Templates(c)
+	if err = renderText(c, jsTemplates, "jquery-2.0.3.min.js"); err != nil {
+		return
+	}
+	if err = renderText(c, jsTemplates, "underscore-min.js"); err != nil {
+		return
+	}
+	if err = renderText(c, jsTemplates, "backbone-min.js"); err != nil {
+		return
+	}
+	if err = renderText(c, jsTemplates, "bootstrap.min.js"); err != nil {
+		return
+	}
+	if err = render_Templates(c); err != nil {
+		return
+	}
 	for _, templ := range jsModelTemplates.Templates() {
-		if err := templ.Execute(c.Resp(), c); err != nil {
-			panic(err)
+		if err = templ.Execute(c.Resp(), c); err != nil {
+			return
 		}
 	}
 	for _, templ := range jsCollectionTemplates.Templates() {
-		if err := templ.Execute(c.Resp(), c); err != nil {
-			panic(err)
+		if err = templ.Execute(c.Resp(), c); err != nil {
+			return
 		}
 	}
 	for _, templ := range jsViewTemplates.Templates() {
-		if err := templ.Execute(c.Resp(), c); err != nil {
-			panic(err)
+		if err = templ.Execute(c.Resp(), c); err != nil {
+			return
 		}
 	}
-	renderText(c, jsTemplates, "app.js")
+	return renderText(c, jsTemplates, "app.js")
 }
 
-func Index(c common.Context) {
+func Index(c common.HTTPContext) error {
 	c.SetContentType("text/html; charset=UTF-8")
-	renderText(c, htmlTemplates, "index.html")
+	return renderText(c, htmlTemplates, "index.html")
+}
 
+func User(c common.JSONContext) (result jsoncontext.Resp, err error) {
+	user, ok := c.Session().Values["user"].(model.User)
+	if ok {
+		if err = (&user).Load(c); err != nil {
+			return
+		}
+		result.Body = user
+	}
+	return
+}
+
+func Logout(c common.HTTPContext) (err error) {
+	c.Session().Values["user"] = nil
+	if err = c.Save(); err != nil {
+		return
+	}
+	c.Resp().Header().Set("Location", "/")
+	c.Resp().WriteHeader(303)
+	return
+}
+
+func Login(c common.HTTPContext) (err error) {
+	c.Resp().Header().Set("Location", fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%v", common.ClientId, time.Now().UnixNano()))
+	c.Resp().WriteHeader(303)
+	return
+}
+
+func OAuth(c common.HTTPContext) (err error) {
+	var state int64
+	if state, err = strconv.ParseInt(c.Req().URL.Query().Get("state"), 10, 64); err != nil {
+		return
+	}
+	now := time.Now()
+	stateTime := time.Unix(0, state)
+	diff := now.Sub(stateTime)
+	if now.Sub(stateTime) > time.Minute {
+		err = fmt.Errorf("Now is %v, state is %v, diff is too long: %v", now, stateTime, diff)
+		return
+	}
+	client := urlfetch.Client(c)
+	var req *http.Request
+	if req, err = http.NewRequest("POST", "https://github.com/login/oauth/access_token", bytes.NewBuffer([]byte(url.Values{
+		"client_id":     {common.ClientId},
+		"client_secret": {common.ClientSecret},
+		"code":          {c.Req().URL.Query().Get("code")},
+	}.Encode()))); err != nil {
+		return
+	}
+	var resp *http.Response
+	if resp, err = client.Do(req); err != nil {
+		return
+	}
+	if resp.StatusCode != 200 {
+		err = fmt.Errorf("Got %+v when doing %+v", resp, req)
+		return
+	}
+	buf := &bytes.Buffer{}
+	if _, err = io.Copy(buf, resp.Body); err != nil {
+		return
+	}
+	var values url.Values
+	if values, err = url.ParseQuery(buf.String()); err != nil {
+		return
+	}
+	if values.Get("scope") != "repo" {
+		err = fmt.Errorf("Unknown scope %#v", values.Get("scope"))
+		return
+	}
+	if values.Get("token_type") != "bearer" {
+		err = fmt.Errorf("Unknown token type %#v", values.Get("token_type"))
+		return
+	}
+	user := &model.User{
+		AccessToken: values.Get("access_token"),
+	}
+	c.Session().Values["user"] = user
+	if err = c.Save(); err != nil {
+		return
+	}
+	c.Resp().Header().Set("Location", "/")
+	c.Resp().WriteHeader(303)
+	return
 }

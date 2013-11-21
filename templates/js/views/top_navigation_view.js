@@ -3,6 +3,7 @@ window.TopNavigationView = Backbone.View.extend({
 	template: _.template($('#top_navigation_underscore').html()),
 
 	initialize: function() {
+	  _.bindAll(this, 'render');
 	  this.buttons = [
 		  {
 			  url: '/',
@@ -10,6 +11,7 @@ window.TopNavigationView = Backbone.View.extend({
 			},
 		];
 		this.activeUrl = null;
+		this.listenTo(window.session.user, 'change', this.render);
 	},
 
 	navigate: function(url) {
