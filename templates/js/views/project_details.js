@@ -4,9 +4,8 @@ window.ProjectDetailsView = Backbone.View.extend({
 
 	initialize: function() {
 	  _.bindAll(this, 'render');
-		this.repos = window.session.user.repos();
 		this.listenTo(this.model, 'change', this.render);
-		this.listenTo(this.repos, 'reset', this.render);
+		this.listenTo(window.session.user.repos, 'reset', this.render);
 	},
 
 	updateProject: function() {
@@ -28,7 +27,7 @@ window.ProjectDetailsView = Backbone.View.extend({
 		_.each(that.model.get('Repositories'), function(repo) {
       current[repo] = true;
 		});
-		that.repos.each(function(repo) {
+		window.session.user.repos.each(function(repo) {
       that.$('.project-repositories').append('<option ' + (current[repo.get('full_name')] ? 'selected="selected" ' : '' ) + 'value=' + repo.get('full_name') + '>' + repo.get('full_name') + '</option>');
 		});
 		that.$('.project-repositories').multiSelect({
