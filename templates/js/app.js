@@ -5,7 +5,7 @@ $(window).load(function() {
   
 	$(document).on('click', 'a.navigate', function(ev) {
 	  ev.preventDefault();
-		window.session.nav.navigate($(ev.currentTarget).attr('href'));
+	  window.session.router.navigate($(ev.target).attr('href'), { trigger: true });
 	});
 
 	var AppRouter = Backbone.Router.extend({
@@ -21,12 +21,25 @@ $(window).load(function() {
 		},
 
 		routes: {
+			"projects/:id": "showProject",
 			"": "projects",
 			"*all": "projects",
 		},
 
 		projects: function() {
 		  this.render(new ProjectsView({}));
+		},
+
+		showProject: function(id) {
+			var that = this;
+		  var project = new Project({ Id: id });
+			project.fetch({
+			  success: function() {
+					that.render(new ProjectDetailsView({
+					  model: project,
+					}));
+				},
+			});
 		},
 	});	
 	
@@ -42,7 +55,7 @@ $(window).load(function() {
 		pushState: true,
 	});
 
-	window.session.nav.navigate(Backbone.history.fragment || '/');
+	window.session.router.navigate(Backbone.history.fragment || '/');
 });
 
 

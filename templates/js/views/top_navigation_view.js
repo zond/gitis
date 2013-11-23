@@ -9,11 +9,8 @@ window.TopNavigationView = Backbone.View.extend({
 		this.listenTo(window.session.user, 'change', this.render);
 	},
 
-	navigate: function(url) {
-	  window.session.router.navigate(url, { trigger: true });
-		this.path = _.reject(url.split('/'), function(el) {
-		  return el == '';
-		});
+	setPath: function(path) {
+	  this.path = path;
 		this.render();
 	},
 
@@ -21,7 +18,7 @@ window.TopNavigationView = Backbone.View.extend({
 		var that = this;
 		that.$el.html(that.template({}));
 		var path = '/';
-    var last_li = $('<li><a href="/"><span class="glyphicon glyphicon-list"></span></a></li>');
+    var last_li = $('<li><a class="navigate" href="/"><span class="glyphicon glyphicon-list"></span></a></li>');
 		that.$('.breadcrumb').append(last_li);
 		_.each(that.path, function(el) {
 		  path = path + '/' + el;
@@ -30,9 +27,9 @@ window.TopNavigationView = Backbone.View.extend({
 		});
 		last_li.addClass('active');
 		if (window.session.user.loggedIn()) {
-		  that.$('ul.navbar-right').append('<li><a href="/logout">Sign out</a></li>');
+		  that.$('.navbar-right').append('<a class="btn btn-default" href="/logout">Sign out</a>');
 		} else {
-		  that.$('ul.navbar-right').append('<li><a href="/login">Sign in</a></li>');
+		  that.$('.navbar-right').append('<a class="btn btn-default" href="/login">Sign in</a>');
 		}
 		$('#content').css('margin-top', that.$el.height());
 		return that;

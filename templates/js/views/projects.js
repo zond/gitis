@@ -25,6 +25,7 @@ window.ProjectsView = Backbone.View.extend({
 
 	render: function() {
 		var that = this;
+		window.session.nav.setPath([ ]);
 		that.$el.html(that.template({}));
 		if (window.session.user.loggedIn()) {
       that.collection.each(function(project) {

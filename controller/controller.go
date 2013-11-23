@@ -133,7 +133,20 @@ func CreateProject(c model.JSONContext) (result jsoncontext.Resp, err error) {
 	return
 }
 
-func DeleteProject(c model.JSONContext) (result jsoncontext.Resp, err error) {
+func GetProjectById(c model.JSONContext) (result jsoncontext.Resp, err error) {
+	var id *datastore.Key
+	if id, err = datastore.DecodeKey(c.Vars()["project_id"]); err != nil {
+		return
+	}
+	var project *model.Project
+	if project, err = model.GetProjectById(c, id); err != nil {
+		return
+	}
+	result.Body = project
+	return
+}
+
+func DeleteProjectById(c model.JSONContext) (result jsoncontext.Resp, err error) {
 	var id *datastore.Key
 	if id, err = datastore.DecodeKey(c.Vars()["project_id"]); err != nil {
 		return

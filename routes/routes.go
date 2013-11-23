@@ -71,7 +71,8 @@ func init() {
 	projectsRouter := router.PathPrefix("/projects").MatcherFunc(wantsJSON).Subrouter()
 
 	projectRouter := projectsRouter.PathPrefix("/{project_id}").Subrouter()
-	projectRouter.Methods("DELETE").Handler(model.JSONHandlerFunc(controller.DeleteProject))
+	projectRouter.Methods("DELETE").Handler(model.JSONHandlerFunc(controller.DeleteProjectById))
+	projectRouter.Methods("GET").Handler(model.JSONHandlerFunc(controller.GetProjectById))
 
 	projectsRouter.Methods("GET").Handler(model.JSONHandlerFunc(controller.Projects))
 	projectsRouter.Methods("POST").Handler(model.JSONHandlerFunc(controller.CreateProject))
