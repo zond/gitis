@@ -4,40 +4,35 @@ window.TopNavigationView = Backbone.View.extend({
 
 	initialize: function() {
 	  _.bindAll(this, 'render');
-	  this.buttons = [
-		  {
-			  url: '/',
-				label: 'About',
-			},
-			{
-			  url: '/projects',
-				label: 'Projects',
-			},
+		this.path = [
 		];
-		this.activeUrl = null;
 		this.listenTo(window.session.user, 'change', this.render);
 	},
 
 	navigate: function(url) {
 	  window.session.router.navigate(url, { trigger: true });
-		this.activeUrl = url;
+		this.path = _.reject(url.split('/'), function(el) {
+		  return el == '';
+		});
 		this.render();
 	},
 
 	render: function() {
 		var that = this;
 		that.$el.html(that.template({}));
-		_.each(that.buttons, function(button) {
-		  if (that.activeUrl == button.url || ('/' + that.activeUrl) == button.url) {
-				that.$('ul.navbar-left').append('<li class="active"><a class="navigate" href="' + button.url + '">' + button.label + '</a></li>');
-			} else {
-				that.$('ul.navbar-left').append('<li><a class="navigate" href="' + button.url + '">' + button.label + '</a></li>');
-			}
+		var path = '/';
+    var last_li = $('<li><a href="/"><span class="glyphicon glyphicon-list"></span></a></li>');
+		that.$('.breadcrumb').append(last_li);
+		_.each(that.path, function(el) {
+		  path = path + '/' + el;
+		  last_li = $('<li><a href="' + path + '">' + el + '</a></li>');
+			that.$('.breadcrumb').append(last_li);
 		});
+		last_li.addClass('active');
 		if (window.session.user.loggedIn()) {
-		  that.$('ul.navbar-right').append('<li><a class="btn navbar-btn btn-xs" href="/logout">Sign out</a></li>');
+		  that.$('ul.navbar-right').append('<li><a href="/logout">Sign out</a></li>');
 		} else {
-		  that.$('ul.navbar-right').append('<li><a class="btn navbar-btn btn-xs" href="/login">Sign in</a></li>');
+		  that.$('ul.navbar-right').append('<li><a href="/login">Sign in</a></li>');
 		}
 		$('#content').css('margin-top', that.$el.height());
 		return that;

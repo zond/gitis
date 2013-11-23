@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"appengine"
 	"appengine/urlfetch"
 	"bytes"
 	"common"
@@ -126,12 +127,32 @@ func Logout(c common.HTTPContext) (err error) {
 }
 
 func Login(c common.HTTPContext) (err error) {
-	c.Resp().Header().Set("Location", fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%v", common.ClientId, time.Now().UnixNano()))
-	c.Resp().WriteHeader(303)
+	if appengine.IsDevAppServer() {
+		c.Resp().Header().Set("Location", fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%v&redirect_uri=%s", common.ClientId, time.Now().UnixNano(), "https://gitis-hosted.appspot.com/oauth/local"))
+		c.Resp().WriteHeader(303)
+	} else {
+		c.Resp().Header().Set("Location", fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%v", common.ClientId, time.Now().UnixNano()))
+		c.Resp().WriteHeader(303)
+	}
 	return
 }
 
 func OAuth(c common.HTTPContext) (err error) {
+	if err = oAuth(c); err != nil {
+		return
+	}
+	c.Resp().Header().Set("Location", "/")
+	c.Resp().WriteHeader(303)
+	return
+}
+
+func OAuthLocal(c common.HTTPContext) (err error) {
+	c.Resp().Header().Set("Location", fmt.Sprintf("http://localhost:8080/oauth?%s", c.Req().URL.RawQuery))
+	c.Resp().WriteHeader(303)
+	return
+}
+
+func oAuth(c common.HTTPContext) (err error) {
 	var state int64
 	if state, err = strconv.ParseInt(c.Req().URL.Query().Get("state"), 10, 64); err != nil {
 		return
@@ -183,7 +204,5 @@ func OAuth(c common.HTTPContext) (err error) {
 	if err = c.Save(); err != nil {
 		return
 	}
-	c.Resp().Header().Set("Location", "/")
-	c.Resp().WriteHeader(303)
 	return
 }

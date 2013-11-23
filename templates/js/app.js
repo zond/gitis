@@ -21,13 +21,8 @@ $(window).load(function() {
 		},
 
 		routes: {
-			"": "about",
-			"projects": "projects",
-			"*all": "about",
-		},
-
-		about: function() {
-			this.render(new AboutView({}));
+			"": "projects",
+			"*all": "projects",
 		},
 
 		projects: function() {

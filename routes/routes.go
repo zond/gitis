@@ -70,6 +70,7 @@ func init() {
 
 	router.Path("/login").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.Login))
 	router.Path("/logout").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.Logout))
+	router.Path("/oauth/local").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.OAuthLocal))
 	router.Path("/oauth").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.OAuth))
 
 	handleStatic(router, "static")

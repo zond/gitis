@@ -11,9 +11,9 @@ window.ProjectsView = Backbone.View.extend({
 		var that = this;
 		that.$el.html(that.template({}));
 		if (window.session.user.loggedIn()) {
-		  that.$('.add-project').show();
+		  that.$el.show();
 		} else {
-		  that.$('.add-project').hide();
+		  that.$el.hide();
 		}
 		return that;
 	},
