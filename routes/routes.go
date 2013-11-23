@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"common"
 	"github.com/gorilla/mux"
 	"github.com/soundtrackyourbrand/utils/web/httpcontext"
 	"github.com/zond/gitis/controller"
 	"io"
+	"model"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -63,19 +63,21 @@ func handleStatic(router *mux.Router, dir string) {
 func init() {
 	router := mux.NewRouter()
 
-	router.Path("/js/{ver}/all.js").Handler(common.HTTPHandlerFunc(controller.AllJS))
-	router.Path("/css/{ver}/all.css").Handler(common.HTTPHandlerFunc(controller.AllCSS))
+	router.Path("/js/{ver}/all.js").Handler(model.HTTPHandlerFunc(controller.AllJS))
+	router.Path("/css/{ver}/all.css").Handler(model.HTTPHandlerFunc(controller.AllCSS))
 
-	router.Path("/user").MatcherFunc(wantsJSON).Handler(common.JSONHandlerFunc(controller.User))
+	router.Path("/user").MatcherFunc(wantsJSON).Handler(model.JSONHandlerFunc(controller.User))
 
-	router.Path("/login").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.Login))
-	router.Path("/logout").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.Logout))
-	router.Path("/oauth/local").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.OAuthLocal))
-	router.Path("/oauth").MatcherFunc(wantsHTML).Handler(common.HTTPHandlerFunc(controller.OAuth))
+	router.Path("/projects").MatcherFunc(wantsJSON).Handler(model.JSONHandlerFunc(controller.Projects))
+
+	router.Path("/login").MatcherFunc(wantsHTML).Handler(model.HTTPHandlerFunc(controller.Login))
+	router.Path("/logout").MatcherFunc(wantsHTML).Handler(model.HTTPHandlerFunc(controller.Logout))
+	router.Path("/oauth/local").MatcherFunc(wantsHTML).Handler(model.HTTPHandlerFunc(controller.OAuthLocal))
+	router.Path("/oauth").MatcherFunc(wantsHTML).Handler(model.HTTPHandlerFunc(controller.OAuth))
 
 	handleStatic(router, "static")
 
-	router.PathPrefix("/").MatcherFunc(wantsHTML).Methods("GET").Handler(common.HTTPHandlerFunc(controller.Index))
+	router.PathPrefix("/").MatcherFunc(wantsHTML).Methods("GET").Handler(model.HTTPHandlerFunc(controller.Index))
 
 	http.Handle("/", router)
 }

@@ -25,7 +25,7 @@ var _Templates = template.Must(template.New("_Templates").ParseGlob("templates/_
 var jsTemplates = template.Must(template.New("jsTemplates").ParseGlob("templates/js/*.js"))
 var cssTemplates = template.Must(template.New("cssTemplates").ParseGlob("templates/css/*.css"))
 
-func AllCSS(c common.HTTPContext) (err error) {
+func AllCSS(c model.HTTPContext) (err error) {
 	c.SetContentType("text/css; charset=UTF-8")
 	if err = renderText(c, cssTemplates, "bootstrap.min.css"); err != nil {
 		return
@@ -37,11 +37,11 @@ func AllCSS(c common.HTTPContext) (err error) {
 	return
 }
 
-func renderText(c common.HTTPContext, templates *template.Template, template string) error {
+func renderText(c model.HTTPContext, templates *template.Template, template string) error {
 	return templates.ExecuteTemplate(c.Resp(), template, c)
 }
 
-func render_Templates(c common.HTTPContext) error {
+func render_Templates(c model.HTTPContext) error {
 	fmt.Fprintln(c.Resp(), "(function() {")
 	fmt.Fprintln(c.Resp(), "  var n;")
 	var buf *bytes.Buffer
@@ -65,7 +65,7 @@ func render_Templates(c common.HTTPContext) error {
 	return nil
 }
 
-func AllJS(c common.HTTPContext) (err error) {
+func AllJS(c model.HTTPContext) (err error) {
 	c.SetContentType("application/javascript; charset=UTF-8")
 	if err = renderText(c, jsTemplates, "jquery-2.0.3.min.js"); err != nil {
 		return
@@ -100,23 +100,17 @@ func AllJS(c common.HTTPContext) (err error) {
 	return renderText(c, jsTemplates, "app.js")
 }
 
-func Index(c common.HTTPContext) error {
+func Index(c model.HTTPContext) error {
 	c.SetContentType("text/html; charset=UTF-8")
 	return renderText(c, htmlTemplates, "index.html")
 }
 
-func User(c common.JSONContext) (result jsoncontext.Resp, err error) {
-	user, ok := c.Session().Values["user"].(model.User)
-	if ok {
-		if err = (&user).Load(c); err != nil {
-			return
-		}
-		result.Body = user
-	}
+func User(c model.JSONContext) (result jsoncontext.Resp, err error) {
+	result.Body = c.User()
 	return
 }
 
-func Logout(c common.HTTPContext) (err error) {
+func Logout(c model.HTTPContext) (err error) {
 	c.Session().Values["user"] = nil
 	if err = c.Save(); err != nil {
 		return
@@ -126,7 +120,16 @@ func Logout(c common.HTTPContext) (err error) {
 	return
 }
 
-func Login(c common.HTTPContext) (err error) {
+func Projects(c model.JSONContext) (result jsoncontext.Resp, err error) {
+	var projects model.Projects
+	if projects, err = model.GetProjectsByUserId(c); err != nil {
+		return
+	}
+	result.Body = projects
+	return
+}
+
+func Login(c model.HTTPContext) (err error) {
 	if appengine.IsDevAppServer() {
 		c.Resp().Header().Set("Location", fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%v&redirect_uri=%s", common.ClientId, time.Now().UnixNano(), "https://gitis-hosted.appspot.com/oauth/local"))
 		c.Resp().WriteHeader(303)
@@ -137,7 +140,7 @@ func Login(c common.HTTPContext) (err error) {
 	return
 }
 
-func OAuth(c common.HTTPContext) (err error) {
+func OAuth(c model.HTTPContext) (err error) {
 	if err = oAuth(c); err != nil {
 		return
 	}
@@ -146,13 +149,13 @@ func OAuth(c common.HTTPContext) (err error) {
 	return
 }
 
-func OAuthLocal(c common.HTTPContext) (err error) {
+func OAuthLocal(c model.HTTPContext) (err error) {
 	c.Resp().Header().Set("Location", fmt.Sprintf("http://localhost:8080/oauth?%s", c.Req().URL.RawQuery))
 	c.Resp().WriteHeader(303)
 	return
 }
 
-func oAuth(c common.HTTPContext) (err error) {
+func oAuth(c model.HTTPContext) (err error) {
 	var state int64
 	if state, err = strconv.ParseInt(c.Req().URL.Query().Get("state"), 10, 64); err != nil {
 		return
@@ -199,6 +202,9 @@ func oAuth(c common.HTTPContext) (err error) {
 	}
 	user := &model.User{
 		AccessToken: values.Get("access_token"),
+	}
+	if err = user.Load(c); err != nil {
+		return
 	}
 	c.Session().Values["user"] = user
 	if err = c.Save(); err != nil {

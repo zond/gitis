@@ -3,7 +3,6 @@ package model
 import (
 	"appengine/datastore"
 	"bytes"
-	"common"
 	"fmt"
 	"github.com/soundtrackyourbrand/utils/gae"
 	"github.com/soundtrackyourbrand/utils/gae/memcache"
@@ -30,9 +29,13 @@ type Project struct {
 	Name   string         `json:"name"`
 }
 
-func GetProjectsByUserId(c common.HTTPContext, userId int) (result Projects, err error) {
-	_, err = memcache.Memoize(c, fmt.Sprintf("Projects{UserId:%v}", userId), &result, func() (interface{}, error) {
-		ids, err := datastore.NewQuery("Project").Filter("UserId=", userId).GetAll(c, &result)
+func GetProjectsByUserId(c HTTPContext) (result Projects, err error) {
+	result = Projects{}
+	if c.User() == nil {
+		return
+	}
+	_, err = memcache.Memoize(c, fmt.Sprintf("Projects{UserId:%v}", c.User().Id), &result, func() (interface{}, error) {
+		ids, err := datastore.NewQuery("Project").Filter("UserId=", c.User().Id).GetAll(c, &result)
 		if err = gae.FilterOkErrors(err); err != nil {
 			return nil, err
 		}
