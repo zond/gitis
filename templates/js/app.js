@@ -46,6 +46,18 @@ $(window).load(function() {
 	window.session.user = new User();
 	window.session.user.fetch();
 
+	$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+	  var token = window.session.user.get('AccessToken');
+	  if (token != null && token != '') {
+			if (options.headers == null) {
+				options.headers = {};
+			}
+			if (options.headers['Authorization'] == null) {
+				options.headers['Authorization'] = 'token ' + token;
+			}
+		}
+	});
+
 	window.session.nav = new TopNavigationView({
 		el: $('nav'),
 	}).render();

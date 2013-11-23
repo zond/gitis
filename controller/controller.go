@@ -34,6 +34,9 @@ func AllCSS(c model.HTTPContext) (err error) {
 	if err = renderText(c, cssTemplates, "bootstrap-theme.min.css"); err != nil {
 		return
 	}
+	if err = renderText(c, cssTemplates, "multi-select.css"); err != nil {
+		return
+	}
 	err = renderText(c, cssTemplates, "common.css")
 	return
 }
@@ -69,6 +72,9 @@ func render_Templates(c model.HTTPContext) error {
 func AllJS(c model.HTTPContext) (err error) {
 	c.SetContentType("application/javascript; charset=UTF-8")
 	if err = renderText(c, jsTemplates, "jquery-2.0.3.min.js"); err != nil {
+		return
+	}
+	if err = renderText(c, jsTemplates, "jquery.multi-select.js"); err != nil {
 		return
 	}
 	if err = renderText(c, jsTemplates, "underscore-min.js"); err != nil {
