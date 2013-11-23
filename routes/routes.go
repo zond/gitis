@@ -68,7 +68,13 @@ func init() {
 
 	router.Path("/user").MatcherFunc(wantsJSON).Handler(model.JSONHandlerFunc(controller.User))
 
-	router.Path("/projects").MatcherFunc(wantsJSON).Handler(model.JSONHandlerFunc(controller.Projects))
+	projectsRouter := router.PathPrefix("/projects").MatcherFunc(wantsJSON).Subrouter()
+
+	projectRouter := projectsRouter.PathPrefix("/{project_id}").Subrouter()
+	projectRouter.Methods("DELETE").Handler(model.JSONHandlerFunc(controller.DeleteProject))
+
+	projectsRouter.Methods("GET").Handler(model.JSONHandlerFunc(controller.Projects))
+	projectsRouter.Methods("POST").Handler(model.JSONHandlerFunc(controller.CreateProject))
 
 	router.Path("/login").MatcherFunc(wantsHTML).Handler(model.HTTPHandlerFunc(controller.Login))
 	router.Path("/logout").MatcherFunc(wantsHTML).Handler(model.HTTPHandlerFunc(controller.Logout))

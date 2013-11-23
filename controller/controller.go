@@ -2,6 +2,7 @@ package controller
 
 import (
 	"appengine"
+	"appengine/datastore"
 	"appengine/urlfetch"
 	"bytes"
 	"common"
@@ -117,6 +118,34 @@ func Logout(c model.HTTPContext) (err error) {
 	}
 	c.Resp().Header().Set("Location", "/")
 	c.Resp().WriteHeader(303)
+	return
+}
+
+func CreateProject(c model.JSONContext) (result jsoncontext.Resp, err error) {
+	project := &model.Project{}
+	if err = c.DecodeJSON(project); err != nil {
+		return
+	}
+	if err = project.Save(c); err != nil {
+		return
+	}
+	result.Body = project
+	return
+}
+
+func DeleteProject(c model.JSONContext) (result jsoncontext.Resp, err error) {
+	var id *datastore.Key
+	if id, err = datastore.DecodeKey(c.Vars()["project_id"]); err != nil {
+		return
+	}
+	var project *model.Project
+	if project, err = model.GetProjectById(c, id); err != nil {
+		return
+	}
+	if err = project.Delete(c); err != nil {
+		return
+	}
+	result.Status = 204
 	return
 }
 

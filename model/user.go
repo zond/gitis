@@ -14,10 +14,10 @@ func init() {
 }
 
 type User struct {
-	AccessToken string `json:"access_token"`
-	AvatarUrl   string `json:"avatar_url"`
-	Login       string `json:"login"`
-	Id          int    `json:"id"`
+	AccessToken string
+	AvatarUrl   string
+	Login       string
+	Id          int
 }
 
 func (self *User) Load(c gaecontext.GAEContext) (err error) {
