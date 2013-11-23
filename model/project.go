@@ -26,11 +26,12 @@ func (self Projects) Less(i, j int) bool {
 }
 
 type Project struct {
-	Id        *datastore.Key `datastore:"-"`
-	UserId    int
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Id           *datastore.Key `datastore:"-"`
+	UserId       int
+	Name         string   `update_scopes:"basic"`
+	Repositories []string `update_scopes:"basic"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (self *Project) Save(c HTTPContext) (err error) {

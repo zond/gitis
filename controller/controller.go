@@ -152,6 +152,25 @@ func GetProjectById(c model.JSONContext) (result jsoncontext.Resp, err error) {
 	return
 }
 
+func UpdateProjectById(c model.JSONContext) (result jsoncontext.Resp, err error) {
+	var id *datastore.Key
+	if id, err = datastore.DecodeKey(c.Vars()["project_id"]); err != nil {
+		return
+	}
+	var project *model.Project
+	if project, err = model.GetProjectById(c, id); err != nil {
+		return
+	}
+	if err = c.LoadJSON(project, "basic"); err != nil {
+		return
+	}
+	if err = project.Save(c); err != nil {
+		return
+	}
+	result.Body = project
+	return
+}
+
 func DeleteProjectById(c model.JSONContext) (result jsoncontext.Resp, err error) {
 	var id *datastore.Key
 	if id, err = datastore.DecodeKey(c.Vars()["project_id"]); err != nil {

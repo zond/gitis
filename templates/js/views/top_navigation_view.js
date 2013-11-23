@@ -21,8 +21,8 @@ window.TopNavigationView = Backbone.View.extend({
     var last_li = $('<li><a class="navigate" href="/"><span class="glyphicon glyphicon-list"></span></a></li>');
 		that.$('.breadcrumb').append(last_li);
 		_.each(that.path, function(el) {
-		  path = path + '/' + el;
-		  last_li = $('<li><a href="' + path + '">' + el + '</a></li>');
+		  path = path + '/' + el.label;
+		  last_li = $('<li><a class="navigate" href="' + el.path + '">' + el.label + '</a></li>');
 			that.$('.breadcrumb').append(last_li);
 		});
 		last_li.addClass('active');
