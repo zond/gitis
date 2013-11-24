@@ -15,7 +15,7 @@ window.Issue = Backbone.Model.extend({
 	},
 
 	getPrio: function() {
-	  var match = /Prio: ([\d.]+)/.exec(this.get('body'));
+	  var match = /Prio: ([\d-.]+)/.exec(this.get('body'));
 		if (match == null) {
 		  return 0;
 		}
@@ -25,7 +25,7 @@ window.Issue = Backbone.Model.extend({
 	setPrio: function(p) {
 	  var that = this;
 		if (that.getPrio() != p) {
-			var match = /([\s\S]*)Prio: [\d.]+([\s\S]*)/.exec(that.get('body'));
+			var match = /([\s\S]*)Prio: [\d-.]+([\s\S]*)/.exec(that.get('body'));
 			if (match != null) {
 				that.set('body', match[1] + 'Prio: ' + p + match[2], { silent: true });
 			} else {
