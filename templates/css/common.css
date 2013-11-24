@@ -1,3 +1,8 @@
 #content {
 	margin-left: 5px;
 }
+.issue {
+	border: 1px solid black;
+	margin: 3px;
+	padding: 3px;
+}

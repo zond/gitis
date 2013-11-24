@@ -77,6 +77,9 @@ func AllJS(c model.HTTPContext) (err error) {
 	if err = renderText(c, jsTemplates, "jquery.multi-select.js"); err != nil {
 		return
 	}
+	if err = renderText(c, jsTemplates, "jquery-ui-1.10.3.custom.min.js"); err != nil {
+		return
+	}
 	if err = renderText(c, jsTemplates, "underscore-min.js"); err != nil {
 		return
 	}

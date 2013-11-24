@@ -69,6 +69,7 @@ window.ProjectIssuesView = Backbone.View.extend({
 				}).render().el);
 			}
 		});
+		that.$('.issue-list').sortable();
 		return that;
 	},
 
