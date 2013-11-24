@@ -2,7 +2,7 @@ window.IssueView = Backbone.View.extend({
 
 	template: _.template($('#issue_underscore').html()),
 
-	className: 'issue',
+	className: 'panel panel-default issue',
 
 	initialize: function() {
 	  _.bindAll(this, 'render');

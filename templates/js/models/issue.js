@@ -2,6 +2,20 @@ window.Issue = Backbone.Model.extend({
 
 	urlRoot: 'https://api.github.com/issues',
 
+	fullName: function() {
+	  var match = /^https:\/\/api\.github\.com\/repos\/(.*)\/issues\/(\d+)$/.exec(this.get('url'));
+		if (match == null) {
+		  return 'unknown';
+		}
+		return match[1] + '#' + match[2];
+	},
+
+	htmlBody: function() {
+		return _.collect(_.escape(this.get('body').trim()).split('\n'), function(line) {
+		  return '<p>' + line + '</p>';
+		}).join("");
+	},
+
 	getState: function() {
     if (/State: Ready/.exec(this.get('body')) != null) {
 		  return 'Ready';

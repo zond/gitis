@@ -72,9 +72,10 @@ window.ProjectIssuesView = Backbone.View.extend({
 		that.$('.issue-list').sortable({
 		  connectWith: '.issue-list',
 			stop: function(ev, ui) {
-			  var before = $(ev.toElement).prev('.issue');
-				var after = $(ev.toElement).next('.issue');
-				var newPrio = ev.toElement.issue.getPrio();
+			  var issueElement = $(ev.toElement).closest('.issue');
+			  var before = issueElement.prev('.issue');
+				var after = issueElement.next('.issue');
+				var newPrio = issueElement[0].issue.getPrio();
 				if (before.length == 0 && after.length == 1) {
 				  newPrio = after[0].issue.getPrio() - 1;
 				} else if (before.length == 1 && after.length == 0) {
@@ -82,18 +83,19 @@ window.ProjectIssuesView = Backbone.View.extend({
 				} else if (before.length == 1 && after.length == 1) {
 				  newPrio = (before[0].issue.getPrio() + after[0].issue.getPrio()) / 2.0;
 				}
-        ev.toElement.issue.setPrio(newPrio);
+        issueElement[0].issue.setPrio(newPrio);
 			},
 			receive: function(ev, ui) {
+				var issue = $(ev.toElement).closest('.issue')[0].issue;
 			  var el = $(ev.target);
 				if (el.hasClass('ready-issues')) {
-				  ev.toElement.issue.setState('Ready');
+				  issue.setState('Ready');
 				} else if (el.hasClass('doing-issues')) {
-				  ev.toElement.issue.setState('Doing');
+				  issue.setState('Doing');
 				} else if (el.hasClass('done-issues')) {
-				  ev.toElement.issue.setState('Done');
+				  issue.setState('Done');
 				} else if (el.hasClass('backlog-issues')) {
-				  ev.toElement.issue.setState('Backlog');
+				  issue.setState('Backlog');
 				}
 			},
 		});

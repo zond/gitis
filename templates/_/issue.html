@@ -1,1 +1,12 @@
-#<%- model.get('number') %>: <%- model.get('title') %>
+<div class="panel-heading" data-toggle="collapse" href="#collapse-issue-<%- model.get('id') %>">
+	<small><%- model.fullName() %></small>
+	<p class="issue-title panel-title">
+		<%- model.get('title') %>
+	</p>
+</div>
+<div id="collapse-issue-<%- model.get('id') %>" class="panel-collapse collapse">
+	<div class="panel-body">
+		<%= model.htmlBody() %>
+	</div>
+</div>
+
