@@ -7,7 +7,6 @@ window.Project = Backbone.Model.extend({
 	initialize: function(attrs, opts) {
 	  _.bindAll(this, 'reset');
 	  this.issues = new Issues();
-		this.issues.HEHU = 'xx';
 		this.listenTo(this.issues, 'reset', this.reset);
 	},
 
