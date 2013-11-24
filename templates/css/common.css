@@ -6,11 +6,6 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-.issue {
-	border: 1px solid black;
-	margin: 3px;
-	padding: 3px;
-}
 .issue-list {
 	min-height: 100%;
 }
