@@ -71,6 +71,19 @@ window.ProjectIssuesView = Backbone.View.extend({
 		});
 		that.$('.issue-list').sortable({
 		  connectWith: '.issue-list',
+			stop: function(ev, ui) {
+			  var before = $(ev.toElement).prev('.issue');
+				var after = $(ev.toElement).next('.issue');
+				var newPrio = ev.toElement.issue.getPrio();
+				if (before.length == 0 && after.length == 1) {
+				  newPrio = after[0].issue.getPrio() - 1;
+				} else if (before.length == 1 && after.length == 0) {
+				  newPrio = before[0].issue.getPrio() + 1;
+				} else if (before.length == 1 && after.length == 1) {
+				  newPrio = (before[0].issue.getPrio() + after[0].issue.getPrio()) / 2.0;
+				}
+        ev.toElement.issue.setPrio(newPrio);
+			},
 			receive: function(ev, ui) {
 			  var el = $(ev.target);
 				if (el.hasClass('ready-issues')) {
