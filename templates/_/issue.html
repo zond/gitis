@@ -1,5 +1,8 @@
 <div class="panel-heading" data-toggle="collapse" href="#collapse-issue-<%- model.get('id') %>">
 	<small><%- model.fullName() %></small>
+	<% if (model.get('assignee') != null) { %>
+	<img title="<%- model.get('assignee').login %>" class="avatar" src="<%= model.get('assignee').avatar_url %>">
+	<% } %>
 	<p class="issue-title panel-title">
 		<%- model.get('title') %>
 	</p>
