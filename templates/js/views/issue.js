@@ -14,6 +14,7 @@ window.IssueView = Backbone.View.extend({
 		that.$el.html(that.template({
 		  model: that.model,
 		}));
+		that.el.issue = that.model;
 		return that;
 	},
 

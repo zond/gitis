@@ -50,7 +50,7 @@ window.ProjectIssuesView = Backbone.View.extend({
 		  model: that.model,
 		}));
 		that.model.issues.each(function(issue) {
-		  var state = issue.state();
+		  var state = issue.getState();
 			if (state == 'Ready') {
 			  that.$('.ready-issues').append(new IssueView({
 				  model: issue,
@@ -69,7 +69,21 @@ window.ProjectIssuesView = Backbone.View.extend({
 				}).render().el);
 			}
 		});
-		that.$('.issue-list').sortable();
+		that.$('.issue-list').sortable({
+		  connectWith: '.issue-list',
+			receive: function(ev, ui) {
+			  var el = $(ev.target);
+				if (el.hasClass('ready-issues')) {
+				  ev.toElement.issue.setState('Ready');
+				} else if (el.hasClass('doing-issues')) {
+				  ev.toElement.issue.setState('Doing');
+				} else if (el.hasClass('done-issues')) {
+				  ev.toElement.issue.setState('Done');
+				} else if (el.hasClass('backlog-issues')) {
+				  ev.toElement.issue.setState('Backlog');
+				}
+			},
+		});
 		return that;
 	},
 

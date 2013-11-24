@@ -60,6 +60,11 @@ $(window).load(function() {
 	window.session.user.fetch();
 
 	$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+	  if (options.url.indexOf("?") == -1) {
+			options.url += '?cacheKiller=' + new Date().getTime();
+		} else {
+		  options.url += '&cacheKiller=' + new Date().getTime();
+		}
 	  var token = window.session.user.get('AccessToken');
 	  if (token != null && token != '') {
 			if (options.headers == null) {

@@ -6,3 +6,6 @@
 	margin: 3px;
 	padding: 3px;
 }
+.issue-list {
+	min-height: 100%;
+}
