@@ -8,10 +8,6 @@ window.ProjectDetailsView = Backbone.View.extend({
 		this.listenTo(window.session.user, 'change', this.render);
 	},
 
-	updateProject: function() {
-	  console.log(values);
-	},
-
 	render: function() {
 		var that = this;
 		window.session.nav.setPath([ 

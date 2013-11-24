@@ -5,12 +5,12 @@ window.User = Backbone.Model.extend({
   idAttribute: 'Id',
 
 	initialize: function(attrs, opts) {
-	  _.bindAll(this, 'reset');
+	  _.bindAll(this, 'change');
 	  this.repos = new Repositories();
-		this.listenTo(this.repos, 'reset', this.reset);
+		this.listenTo(this.repos, 'reset', this.change);
 	},
 
-	reset: function() {
+	change: function() {
 	  this.trigger('change');
 	},
 
@@ -44,9 +44,7 @@ window.User = Backbone.Model.extend({
 						var orgRepos = new Repositories([], { url: org.get('repos_url') });
 						orgRepos.fetch({
 							success: function() {
-								orgRepos.each(function(repo) {
-									that.repos.set([repo], { remove: false, silent: true });
-								});
+								that.repos.set(orgRepos.models, { remove: false, silent: true });
 								that.repos.each(function(repo) {
 									var parts = repo.get('full_name').split('/');
 									if (parts[0] == org.get('login') && !orgRepos.contains(repo)) {

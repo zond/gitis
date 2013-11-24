@@ -63,6 +63,10 @@ window.ProjectIssuesView = Backbone.View.extend({
 			  that.$('.done-issues').append(new IssueView({
 				  model: issue,
 				}).render().el);
+			} else if (state == 'Backlog') {
+			  that.$('.backlog-issues').append(new IssueView({
+				  model: issue,
+				}).render().el);
 			}
 		});
 		return that;

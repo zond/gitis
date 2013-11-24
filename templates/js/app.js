@@ -73,38 +73,42 @@ $(window).load(function() {
 
   var oldSync = Backbone.sync;
   Backbone.sync = function(method, model, opts) {
-		var result = null;
-	  if (method == 'read') {
-			var oldSuccess = opts.success;
-			opts.success = function(values) {
-				var fetchNext = null;
-				fetchNext = function(req) {
-					var linkHeader = req.getResponseHeader('Link');
-					if (linkHeader != null) {
-						var rels = linkHeader.split(',');
-						_.each(rels, function(rel) {
-							var parts = rel.split(';');
-							if (parts[1].trim() == 'rel="next"') {
-								var match = /^<(.*)>$/.exec(parts[0].trim());
-								if (match != null) {
-									var req = null;
-									req = $.ajax(match[1], {
-										success: function(data) {
-										  oldSuccess(data);
-											fetchNext(req);
-										},
-									});
-								}
-							}
-						});
-					}
+	  if (method == 'read' && typeof model.models == 'object') {
+		  var getNextLink = function(req) {
+				var linkHeader = req.getResponseHeader('Link');
+				if (linkHeader == null) {
+				  return null;
 				}
-				fetchNext(result);
-				return oldSuccess(values);
+				var rels = linkHeader.split(',');
+				var result = null;
+				_.each(rels, function(rel) {
+					var parts = rel.split(';');
+					if (parts[1].trim() == 'rel="next"') {
+						var match = /^<(.*)>$/.exec(parts[0].trim());
+						if (match != null) {
+							result = match[1];
+						}
+					}
+				});
+				return result;
 			};
+			var req = null;
+			var oldSuccess = opts.success;
+			var sum = [];
+			opts.success = function(values) {
+			  sum = sum.concat(values);
+			  var nextLink = getNextLink(req);
+				if (nextLink == null) {
+				  return oldSuccess(sum);
+				}
+				req = $.ajax(nextLink, {
+					success: opts.success,
+				});
+			};
+			req = oldSync(method, model, opts);
+			return req;
 		}
-	  result = oldSync(method, model, opts);
-		return result;
+		return oldSync(method, model, opts);
 	};
 
 	window.session.nav = new TopNavigationView({

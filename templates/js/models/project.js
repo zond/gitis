@@ -5,12 +5,12 @@ window.Project = Backbone.Model.extend({
 	urlRoot: '/projects',
 
 	initialize: function(attrs, opts) {
-	  _.bindAll(this, 'reset');
+	  _.bindAll(this, 'change');
 	  this.issues = new Issues();
-		this.listenTo(this.issues, 'reset', this.reset);
+		this.listenTo(this.issues, 'reset', this.change);
 	},
 
-	reset: function() {
+	change: function() {
 	  this.trigger('change');
 	},
 
@@ -37,13 +37,15 @@ window.Project = Backbone.Model.extend({
 	},
 
 	issueCount: function() {
-	  var that = this;
-	  var result = 0;
-		window.session.user.repos.each(function(repo) {
-		  if (that.get('Repositories').indexOf(repo.get('full_name')) != -1) {
-			  result += repo.get('open_issues');
-			}
-		});
+		var that = this;
+		var result = 0;
+	  if (that.get('Repositories') != null) {
+			window.session.user.repos.each(function(repo) {
+				if (that.get('Repositories').indexOf(repo.get('full_name')) != -1) {
+					result += repo.get('open_issues');
+				}
+			});
+		}
 		return result;
 	},
 
