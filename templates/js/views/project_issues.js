@@ -49,6 +49,7 @@ window.ProjectIssuesView = Backbone.View.extend({
 		that.$el.html(that.template({
 		  model: that.model,
 		}));
+		that.$('.issue-list').css('height', '' + ($(window).height() - 150) + 'px');
 		that.model.issues.each(function(issue) {
 		  var state = issue.getState();
 			if (state == 'Ready') {
