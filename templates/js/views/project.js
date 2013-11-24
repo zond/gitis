@@ -7,6 +7,7 @@ window.ProjectView = Backbone.View.extend({
 	events: {
 	  'click .remove-button': 'removeProject',
 		'click .show-project': 'showProject',
+		'click .show-issues': 'showIssues',
 	},
 
 	initialize: function() {
@@ -22,6 +23,14 @@ window.ProjectView = Backbone.View.extend({
 	showProject: function(ev) {
 	  ev.preventDefault();
 		window.session.router.render(new ProjectDetailsView({
+			model: this.model,
+		}));
+		this.remove();
+	},
+
+	showIssues: function(ev) {
+	  ev.preventDefault();
+		window.session.router.render(new ProjectIssuesView({
 			model: this.model,
 		}));
 		this.remove();

@@ -2,5 +2,8 @@
 	<a class="navigate show-project" href="/projects/<%- model.get('Id') %>"><%- model.get('Name') %></a>
 </td>
 <td>
+	<a class="navigate show-issues" href="/projects/<%- model.get('Id') %>/issues"><%- model.issueCount() %> issues</a>
+</td>
+<td>
 	<button class="btn btn-default remove-button"><span class="glyphicon glyphicon-trash"></span></button>
 </td>

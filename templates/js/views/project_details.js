@@ -5,7 +5,7 @@ window.ProjectDetailsView = Backbone.View.extend({
 	initialize: function() {
 	  _.bindAll(this, 'render');
 		this.listenTo(this.model, 'change', this.render);
-		this.listenTo(window.session.user.repos, 'reset', this.render);
+		this.listenTo(window.session.user, 'change', this.render);
 	},
 
 	updateProject: function() {

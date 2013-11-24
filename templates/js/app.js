@@ -21,6 +21,7 @@ $(window).load(function() {
 		},
 
 		routes: {
+			"projects/:id/issues": "showIssues",
 			"projects/:id": "showProject",
 			"": "projects",
 			"*all": "projects",
@@ -28,6 +29,18 @@ $(window).load(function() {
 
 		projects: function() {
 		  this.render(new ProjectsView({}));
+		},
+
+		showIssues: function(id) {
+			var that = this;
+		  var project = new Project({ Id: id });
+			project.fetch({
+			  success: function() {
+					that.render(new ProjectIssuesView({
+					  model: project,
+					}));
+				},
+			});
 		},
 
 		showProject: function(id) {
@@ -57,6 +70,42 @@ $(window).load(function() {
 			}
 		}
 	});
+
+  var oldSync = Backbone.sync;
+  Backbone.sync = function(method, model, opts) {
+		var result = null;
+	  if (method == 'read') {
+			var oldSuccess = opts.success;
+			opts.success = function(values) {
+				var fetchNext = null;
+				fetchNext = function(req) {
+					var linkHeader = req.getResponseHeader('Link');
+					if (linkHeader != null) {
+						var rels = linkHeader.split(',');
+						_.each(rels, function(rel) {
+							var parts = rel.split(';');
+							if (parts[1].trim() == 'rel="next"') {
+								var match = /^<(.*)>$/.exec(parts[0].trim());
+								if (match != null) {
+									var req = null;
+									req = $.ajax(match[1], {
+										success: function(data) {
+										  oldSuccess(data);
+											fetchNext(req);
+										},
+									});
+								}
+							}
+						});
+					}
+				}
+				fetchNext(result);
+				return oldSuccess(values);
+			};
+		}
+	  result = oldSync(method, model, opts);
+		return result;
+	};
 
 	window.session.nav = new TopNavigationView({
 		el: $('nav'),
