@@ -16,6 +16,23 @@ window.Issue = Backbone.Model.extend({
 		}).join("");
 	},
 
+	getDeps: function(states) {
+	  var match = /Deps: (\S+)/.exec(this.get('body'));
+		if (match == null) {
+		  return [];
+		}
+		return _.collect(match[1].split(/,/), function(dep) {
+		  var state = states[dep];
+			if (state == null) {
+				return true;
+			} else if (state == 'Done') {
+				return true;
+			} else {
+				return false;
+			}
+		});
+	},
+
 	getState: function() {
     if (/State: Ready/.exec(this.get('body')) != null) {
 		  return 'Ready';
@@ -36,6 +53,16 @@ window.Issue = Backbone.Model.extend({
 		return parseFloat(match[1]);
 	},
 
+	update: function() {
+		var that = this;
+		$.ajax(that.get('url'), {
+			type: 'PATCH',
+			data: JSON.stringify({
+				body: that.get('body'),
+			}),
+		});
+	},
+
 	setPrio: function(p) {
 	  var that = this;
 		if (that.getPrio() != p) {
@@ -45,13 +72,9 @@ window.Issue = Backbone.Model.extend({
 			} else {
 				that.set('body', that.get('body') + '\nPrio: ' + p, { silent: true });
 			}
-			$.ajax(that.get('url'), {
-				type: 'PATCH',
-				data: JSON.stringify({
-					body: that.get('body'),
-				}),
-			});
+			return true;
 		}
+		return false;
 	},
 
 	setState: function(s) {
@@ -63,13 +86,9 @@ window.Issue = Backbone.Model.extend({
 			} else {
 				that.set('body', that.get('body') + '\nState: ' + s, { silent: true });
 			}
-			$.ajax(that.get('url'), {
-				type: 'PATCH',
-				data: JSON.stringify({
-					body: that.get('body'),
-				}),
-			});
+			return true;
 		}
+		return false;
 	},
 
 });

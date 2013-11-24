@@ -1,11 +1,17 @@
 <div class="panel-heading" data-toggle="collapse" href="#collapse-issue-<%- model.get('id') %>">
 	<small><%- model.fullName() %></small>
-	<% if (model.get('assignee') != null) { %>
-	<img title="<%- model.get('assignee').login %>" class="avatar" src="<%= model.get('assignee').avatar_url %>">
+	<% if (assignee != null) { %>
+	<img title="<%- assignee.login %>" class="avatar" src="<%= assignee.avatar_url %>">
 	<% } %>
 	<p class="issue-title panel-title">
 		<%- model.get('title') %>
 	</p>
+	<% if (deps.length > 0) { %>
+	<div class="gitis-progress">
+		<div class="gitis-progress-bar" style="width: <%- ((done.length / deps.length) * 100.0) %>%">
+		</div>
+	</div>
+	<% } %>
 </div>
 <div id="collapse-issue-<%- model.get('id') %>" class="panel-collapse collapse">
 	<div class="panel-body">

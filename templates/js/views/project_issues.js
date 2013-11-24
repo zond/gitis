@@ -54,51 +54,62 @@ window.ProjectIssuesView = Backbone.View.extend({
 		  var state = issue.getState();
 			if (state == 'Ready') {
 			  that.$('.ready-issues').append(new IssueView({
+				  project: that.model,
 				  model: issue,
 				}).render().el);
 			} else if (state == 'Doing') {
 			  that.$('.doing-issues').append(new IssueView({
+				  project: that.model,
 				  model: issue,
 				}).render().el);
 			} else if (state == 'Done') {
 			  that.$('.done-issues').append(new IssueView({
+				  project: that.model,
 				  model: issue,
 				}).render().el);
 			} else if (state == 'Backlog') {
 			  that.$('.backlog-issues').append(new IssueView({
+				  project: that.model,
 				  model: issue,
 				}).render().el);
 			}
 		});
+		var updateFunc = function(ev, ui) {
+			var issueElement = $(ev.toElement).closest('.issue');
+			if (issueElement.length == 1) {
+				var issue = $(ev.toElement).closest('.issue')[0].issue;
+				var before = issueElement.prev('.issue');
+				var after = issueElement.next('.issue');
+				var changedPrio = false;
+				var newPrio = issue.getPrio();
+				if (before.length == 0 && after.length == 1) {
+					newPrio = after[0].issue.getPrio() - 1;
+				} else if (before.length == 1 && after.length == 0) {
+					newPrio = before[0].issue.getPrio() + 1;
+				} else if (before.length == 1 && after.length == 1) {
+					newPrio = (before[0].issue.getPrio() + after[0].issue.getPrio()) / 2.0;
+				}
+				changedPrio = issue.setPrio(newPrio);
+				var el = $(ev.target);
+				if (el.hasClass('ready-issues')) {
+					issue.setState('Ready');
+				} else if (el.hasClass('doing-issues')) {
+					issue.setState('Doing');
+				} else if (el.hasClass('done-issues')) {
+					issue.setState('Done');
+				} else if (el.hasClass('backlog-issues')) {
+					issue.setState('Backlog');
+				}
+				var changedState = that.model.updateStates();
+				if (changedState || changedPrio) {
+				  issue.update();
+				}
+			}
+		};
 		that.$('.issue-list').sortable({
 		  connectWith: '.issue-list',
-			stop: function(ev, ui) {
-			  var issueElement = $(ev.toElement).closest('.issue');
-			  var before = issueElement.prev('.issue');
-				var after = issueElement.next('.issue');
-				var newPrio = issueElement[0].issue.getPrio();
-				if (before.length == 0 && after.length == 1) {
-				  newPrio = after[0].issue.getPrio() - 1;
-				} else if (before.length == 1 && after.length == 0) {
-				  newPrio = before[0].issue.getPrio() + 1;
-				} else if (before.length == 1 && after.length == 1) {
-				  newPrio = (before[0].issue.getPrio() + after[0].issue.getPrio()) / 2.0;
-				}
-        issueElement[0].issue.setPrio(newPrio);
-			},
-			receive: function(ev, ui) {
-				var issue = $(ev.toElement).closest('.issue')[0].issue;
-			  var el = $(ev.target);
-				if (el.hasClass('ready-issues')) {
-				  issue.setState('Ready');
-				} else if (el.hasClass('doing-issues')) {
-				  issue.setState('Doing');
-				} else if (el.hasClass('done-issues')) {
-				  issue.setState('Done');
-				} else if (el.hasClass('backlog-issues')) {
-				  issue.setState('Backlog');
-				}
-			},
+			stop: updateFunc,
+			receive: updateFunc,
 		});
 		return that;
 	},

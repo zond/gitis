@@ -8,10 +8,21 @@ window.Project = Backbone.Model.extend({
 	  _.bindAll(this, 'change');
 	  this.issues = new Issues();
 		this.listenTo(this.issues, 'reset', this.change);
+		this.states = {};
 	},
 
 	change: function() {
+	  this.updateStates()
 	  this.trigger('change');
+	},
+
+	updateStates: function() {
+		var that = this;
+	  that.states = {};
+		that.issues.each(function(issue) {
+			that.states[issue.fullName()] = issue.getState();
+		});
+		that.trigger('updated_states');
 	},
 
 	parse: function(data) {
