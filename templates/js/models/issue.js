@@ -16,12 +16,29 @@ window.Issue = Backbone.Model.extend({
 		}).join("");
 	},
 
-	getDeps: function(states) {
-	  var match = /Deps: (\S+)/.exec(this.get('body'));
+	getMeta: function() {
+	  var match = /<!--@gitis:(.*)-->/.exec(this.get('body'));
 		if (match == null) {
+		  return {};
+		}
+		return JSON.parse(match[1]);
+	},
+
+	setMeta: function(m) {
+	  var match = /^([\s\S]*<!--@gitis:).*(-->[\s\S]*)$/.exec(this.get('body'));
+		if (match == null) {
+		  this.set('body', this.get('body') + '\n<!--@gitis:' + JSON.stringify(m) + '-->', { silent: true });
+		} else {
+		  this.set('body', match[1] + JSON.stringify(m) + match[2], { silent: true });
+		}
+	},
+
+	getDeps: function(states) {
+	  var deps = this.getMeta().deps;
+		if (deps == null) {
 		  return [];
 		}
-		return _.collect(match[1].split(/,/), function(dep) {
+		return _.collect(deps, function(dep) {
 		  var state = states[dep];
 			if (state == null) {
 				return true;
@@ -34,23 +51,19 @@ window.Issue = Backbone.Model.extend({
 	},
 
 	getState: function() {
-    if (/State: Ready/.exec(this.get('body')) != null) {
-		  return 'Ready';
-		} else if (/State: Doing/.exec(this.get('body')) != null) {
-		  return 'Doing';
-		} else if (/State: Done/.exec(this.get('body')) != null) {
-		  return 'Done';
-		} else {
+	  var state = this.getMeta().state;
+		if (state == null) {
 		  return 'Backlog';
 		}
+		return state;
 	},
 
 	getPrio: function() {
-	  var match = /Prio: ([\d-.]+)/.exec(this.get('body'));
-		if (match == null) {
+	  var prio = this.getMeta().prio;
+		if (prio == null) {
 		  return 0;
 		}
-		return parseFloat(match[1]);
+		return parseFloat(prio);
 	},
 
 	setAssignee: function(a) {
@@ -78,28 +91,20 @@ window.Issue = Backbone.Model.extend({
 	},
 
 	setPrio: function(p) {
-	  var that = this;
-		if (that.getPrio() != p) {
-			var match = /([\s\S]*)Prio: [\d-.]+([\s\S]*)/.exec(that.get('body'));
-			if (match != null) {
-				that.set('body', match[1] + 'Prio: ' + p + match[2], { silent: true });
-			} else {
-				that.set('body', that.get('body') + '\nPrio: ' + p, { silent: true });
-			}
+	  if (this.getPrio() != p) {
+			var meta = this.getMeta()
+			meta.prio = p;
+			this.setMeta(meta);
 			return true;
 		}
 		return false;
 	},
 
 	setState: function(s) {
-	  var that = this;
-		if (that.getState() != s) {
-			var match = /([\s\S]*)State: \w+([\s\S]*)/.exec(that.get('body'));
-			if (match != null) {
-				that.set('body', match[1] + 'State: ' + s + match[2], { silent: true });
-			} else {
-				that.set('body', that.get('body') + '\nState: ' + s, { silent: true });
-			}
+		if (this.getState() != s) {
+		  var meta = this.getMeta();
+			meta.state = s;
+			this.setMeta(meta);
 			return true;
 		}
 		return false;

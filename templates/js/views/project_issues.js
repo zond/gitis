@@ -92,16 +92,16 @@ window.ProjectIssuesView = Backbone.View.extend({
 				}
 				changedPrio = issue.setPrio(newPrio);
 				var el = $(ev.target);
+				var changedState = false;
 				if (el.hasClass('ready-issues')) {
-					issue.setState('Ready');
+					changedState = issue.setState('Ready');
 				} else if (el.hasClass('doing-issues')) {
-					issue.setState('Doing');
+					changedState = issue.setState('Doing');
 				} else if (el.hasClass('done-issues')) {
-					issue.setState('Done');
+					changedState = issue.setState('Done');
 				} else if (el.hasClass('backlog-issues')) {
-					issue.setState('Backlog');
+					changedState = issue.setState('Backlog');
 				}
-				var changedState = that.model.updateStates();
 				if (changedState || changedPrio) {
 				  issue.updateBody();
 				}
