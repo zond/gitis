@@ -10,6 +10,7 @@ window.ProjectIssuesView = Backbone.View.extend({
 	initialize: function() {
 	  _.bindAll(this, 'render');
 		this.listenTo(this.model, 'change', this.render);
+		this.ignores = 0;
 	},
 
 	closeBacklog: function(ev) {
@@ -56,26 +57,35 @@ window.ProjectIssuesView = Backbone.View.extend({
 			if (state == 'Ready') {
 			  that.$('.ready-issues').append(new IssueView({
 				  project: that.model,
+					parent: that,
 				  model: issue,
 				}).render().el);
 			} else if (state == 'Doing') {
 			  that.$('.doing-issues').append(new IssueView({
 				  project: that.model,
+					parent: that,
 				  model: issue,
 				}).render().el);
 			} else if (state == 'Done') {
 			  that.$('.done-issues').append(new IssueView({
 				  project: that.model,
+					parent: that,
 				  model: issue,
 				}).render().el);
 			} else if (state == 'Backlog') {
 			  that.$('.backlog-issues').append(new IssueView({
 				  project: that.model,
+					parent: that,
 				  model: issue,
 				}).render().el);
 			}
 		});
 		var updateFunc = function(ev, ui) {
+		  if (that.ignores > 0) {
+			  that.ignores--;
+				$(ev.target).sortable('cancel');
+				return
+			}
 			var issueElement = $(ev.toElement).closest('.issue');
 			if (issueElement.length == 1) {
 				var issue = $(ev.toElement).closest('.issue')[0].issue;
@@ -104,6 +114,9 @@ window.ProjectIssuesView = Backbone.View.extend({
 				}
 				if (changedState || changedPrio) {
 				  issue.updateBody();
+				}
+				if (changedState) {
+				  that.model.updateStates();
 				}
 			}
 		};

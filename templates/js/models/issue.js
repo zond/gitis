@@ -38,11 +38,37 @@ window.Issue = Backbone.Model.extend({
 		}
 	},
 
-	getDeps: function(states) {
+	getDeps: function() {
 	  var deps = this.getMeta().deps;
 		if (deps == null) {
 		  return [];
 		}
+		return deps;
+	},
+
+	removeDep: function(dep) {
+	  var oldDeps = this.getDeps();
+		if (oldDeps.indexOf(dep) != -1) {
+		  var meta = this.getMeta();
+			meta.deps = _.filter(oldDeps, function(d) {
+			  return d != dep;
+			});
+			this.setMeta(meta);
+		}
+	},
+
+	addDep: function(dep) {
+	  var oldDeps = this.getDeps();
+		if (oldDeps.indexOf(dep) == -1) {
+		  var meta = this.getMeta();
+      oldDeps.push(dep);
+			meta.deps = oldDeps;
+			this.setMeta(meta);
+		}
+	},
+
+	getDepStates: function(states) {
+	  var deps = this.getDeps();
 		return _.collect(deps, function(dep) {
 		  var state = states[dep];
 			if (state == null) {

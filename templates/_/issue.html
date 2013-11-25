@@ -13,9 +13,16 @@
 	</div>
 	<% } %>
 </div>
-<div id="collapse-issue-<%- model.get('id') %>" class="panel-collapse collapse">
+<div id="collapse-issue-<%- model.get('id') %>" class="panel-collapse collapse<%- expanded ? ' in' : '' %>">
 	<div class="panel-body">
 		<%= model.htmlBody() %>
+		<div class="deps<%- deps.length == 0 ? ' bordered' : '' %>">
+			Deps
+			<% if (deps.length > 0) { %>
+			<ul class="list-group">
+			</ul>
+			<% } %>
+		</div>
 	</div>
 </div>
 

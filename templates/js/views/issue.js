@@ -4,20 +4,36 @@ window.IssueView = Backbone.View.extend({
 
 	className: 'panel panel-default issue',
 
+	events: {
+		"show.bs.collapse": 'expand',
+		"hide.bs.collapse": 'collapse',
+	},
+
 	initialize: function(options) {
 	  _.bindAll(this, 'render');
 		this.project = options.project;
+		this.parent = options.parent;
 		this.listenTo(this.model, 'change', this.render);
 		this.listenTo(this.project, 'updated_states', this.render);
+		this.expanded = false;
+	},
+
+	collapse: function() {
+	  this.expanded = false;
+	},
+
+	expand: function() {
+	  this.expanded = true;
 	},
 
 	render: function() {
 		var that = this;
-		var deps = that.model.getDeps(that.project.states);
+		var deps = that.model.getDepStates(that.project.states);
 		var done = _.filter(deps, function(dep) {
 		  return dep == true;
 		});
 		that.$el.html(that.template({
+		  expanded: that.expanded,
 			assignee: that.model.get('assignee'),
 			deps: deps,
 			done: done,
@@ -26,6 +42,7 @@ window.IssueView = Backbone.View.extend({
 		that.el.issue = that.model;
 		that.$el.droppable({
 		  accept: '.avatar',
+			hoverClass: 'dropme',
 			drop: function(ev, ui) {
 			  that.model.setAssignee($(ev.toElement).attr('data-login'));
 			},
@@ -40,6 +57,39 @@ window.IssueView = Backbone.View.extend({
 				}
 			},
 		});
+    _.each(that.model.getDeps(), function(dep) {
+		  var state = that.project.states[dep];
+			if (state == null || state == 'Done') {
+			  that.$('.deps .list-group').append('<li class="list-group-item dep" data-issue="' + dep + '"><span class="glyphicon glyphicon-ok-circle"></span> ' + dep + '</li>');
+			} else {
+			  that.$('.deps .list-group').append('<li class="list-group-item dep" data-issue="' + dep + '">' + dep + '</li>');
+			}
+		});
+		that.$('.dep').draggable({
+		  stop: function(ev, ui) {
+				var el = $(ev.target).closest('.dep');
+				var top = parseInt(el.css('top'));
+				var left = parseInt(el.css('left'));
+			  if (top * top > 100 || left * left > 100) {
+				  that.model.removeDep(el.attr('data-issue'));
+					that.model.updateBody();
+					that.project.updateStates();
+				}
+			},
+		});
+		that.$('.deps').droppable({
+		  accept: '.issue',
+			hoverClass: 'dropme',
+			greedy: true,
+			drop: function(ev, ui) {
+			  that.parent.ignores += 2;
+				var issueElement = $(ev.toElement).closest('.issue');
+				that.model.addDep(issueElement.attr('id'));
+				that.model.updateBody();
+				that.project.updateStates();
+			},
+		});
+		that.$el.attr('id', that.model.fullName());
 		return that;
 	},
 
