@@ -224,7 +224,7 @@ func OAuth(c model.HTTPContext) (err error) {
 }
 
 func OAuthLocal(c model.HTTPContext) (err error) {
-	c.Resp().Header().Set("Location", fmt.Sprintf("http://localhost:8080/%i?%s", common.LocalPort, c.Req().URL.RawQuery))
+	c.Resp().Header().Set("Location", fmt.Sprintf("http://localhost:%v/oauth?%s", common.LocalPort, c.Req().URL.RawQuery))
 	c.Resp().WriteHeader(303)
 	return
 }
