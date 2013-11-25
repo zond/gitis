@@ -11,7 +11,12 @@ window.Issue = Backbone.Model.extend({
 	},
 
 	htmlBody: function() {
-		return _.collect(_.escape(this.get('body').trim()).split('\n'), function(line) {
+	  var text = this.get('body');
+	  var match = /^([\s\S]*)<!--@gitis:.*-->([\s\S]*)$/.exec(text);
+		if (match != null) {
+		  text = match[1] + match[2];
+		}
+		return _.collect(_.escape(text.trim()).split('\n'), function(line) {
 		  return '<p>' + line + '</p>';
 		}).join("");
 	},
