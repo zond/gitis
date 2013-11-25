@@ -1,4 +1,6 @@
 {
   "ClientSecret": "...",
-  "ClientId": "...",
+  "ClientId": "2008cb9a94c893b90b53",
+	"RedirectURL": "https://gitis-hosted.appspot.com/oauth/local",
+	"LocalPort": 8080
 }

@@ -116,7 +116,11 @@ func Index(c model.HTTPContext) error {
 }
 
 func User(c model.JSONContext) (result jsoncontext.Resp, err error) {
-	result.Body = c.User()
+	if c.User() == nil {
+		result.Body = &model.User{}
+	} else {
+		result.Body = c.User()
+	}
 	return
 }
 
@@ -201,7 +205,7 @@ func Projects(c model.JSONContext) (result jsoncontext.Resp, err error) {
 
 func Login(c model.HTTPContext) (err error) {
 	if appengine.IsDevAppServer() {
-		c.Resp().Header().Set("Location", fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%v&redirect_uri=%s", common.ClientId, time.Now().UnixNano(), "https://gitis-hosted.appspot.com/oauth/local"))
+		c.Resp().Header().Set("Location", fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%v&redirect_uri=%s", common.ClientId, time.Now().UnixNano(), common.LocalRedirectURL))
 		c.Resp().WriteHeader(303)
 	} else {
 		c.Resp().Header().Set("Location", fmt.Sprintf("https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%v", common.ClientId, time.Now().UnixNano()))
@@ -220,7 +224,7 @@ func OAuth(c model.HTTPContext) (err error) {
 }
 
 func OAuthLocal(c model.HTTPContext) (err error) {
-	c.Resp().Header().Set("Location", fmt.Sprintf("http://localhost:8080/oauth?%s", c.Req().URL.RawQuery))
+	c.Resp().Header().Set("Location", fmt.Sprintf("http://localhost:8080/%i?%s", common.LocalPort, c.Req().URL.RawQuery))
 	c.Resp().WriteHeader(303)
 	return
 }
