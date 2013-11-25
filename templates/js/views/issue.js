@@ -5,6 +5,8 @@ window.IssueView = Backbone.View.extend({
 	className: 'panel panel-default issue',
 
 	events: {
+		"click .gitlink": "gitlink",
+		"show.bs.collapse .comments": 'showComments',
 		"show.bs.collapse": 'expand',
 		"hide.bs.collapse": 'collapse',
 	},
@@ -16,6 +18,27 @@ window.IssueView = Backbone.View.extend({
 		this.listenTo(this.model, 'change', this.render);
 		this.listenTo(this.project, 'updated_states', this.render);
 		this.expanded = false;
+		this.shownComments = false;
+	},
+
+	showComments: function(ev) {
+		var that = this;
+		if (!that.shownComments) {
+		  that.$('.glyphicon-repeat').removeClass('hidden');
+		  that.model.comments(function(coms) {
+				that.$('.glyphicon-repeat').addClass('hidden');
+				coms.each(function(com) {
+					that.$('.comment-list').append(new CommentView({
+					  model: com,
+					}).render().el);
+				});
+			});
+		}
+		that.shownComments = true;
+	},
+
+	gitlink: function(ev) {
+	  ev.stopPropagation();
 	},
 
 	collapse: function() {

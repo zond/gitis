@@ -1,6 +1,10 @@
 window.Issue = Backbone.Model.extend({
 
 	urlRoot: 'https://api.github.com/issues',
+	
+	initialize: function(attrs, opts) {
+	  this._comments = null;
+	},
 
 	fullName: function() {
 	  var match = /^https:\/\/api\.github\.com\/repos\/(.*)\/issues\/(\d+)$/.exec(this.get('url'));
@@ -8,6 +12,20 @@ window.Issue = Backbone.Model.extend({
 		  return 'unknown';
 		}
 		return match[1] + '#' + match[2];
+	},
+
+  comments: function(cb) {
+	  var that = this;
+	  if (that._comments == null) {
+		  that._comments = new Comments([], { url: that.get('comments_url') });
+			that._comments.fetch({
+			  success: function() {
+				  cb(that._comments);
+				},
+			});
+		} else {
+			cb(that._comments);
+		}
 	},
 
 	htmlBody: function() {

@@ -1,10 +1,10 @@
 <div class="panel-heading" data-toggle="collapse" href="#collapse-issue-<%- model.get('id') %>">
-	<small><%- model.fullName() %></small>
+	<a class="gitlink" target="_" href="<%- model.get('html_url') %>"><small><%- model.fullName() %></small></a>
 	<% if (assignee != null) { %>
 	<img title="<%- assignee.login %>" data-login="<%- assignee.login %>" class="avatar" src="<%= assignee.avatar_url %>">
 	<% } %>
 	<p class="issue-title panel-title">
-		<%- model.get('title') %>
+	<%- model.get('title') %>
 	</p>
 	<% if (deps.length > 0) { %>
 	<div class="gitis-progress">
@@ -22,6 +22,19 @@
 			<ul class="list-group">
 			</ul>
 			<% } %>
+		</div>
+	</div>
+	<div class="panel panel-default comments">
+		<div class="panel-heading" data-toggle="collapse" href="#collapse-issue-<%- model.get('id') %>-comments">
+			<p class="panel-title toggle-comments">
+			<span class="glyphicon glyphicon-repeat hidden"></span> <%- model.get('comments') %> comments
+			</p>
+		</div>
+		<div id="collapse-issue-<%- model.get('id') %>-comments" class="panel-collapse collapse">
+			<div class="panel-body">
+				<ul class="list-group comment-list">
+				</ul>
+			</div>
 		</div>
 	</div>
 </div>
