@@ -24,6 +24,22 @@ window.IssueView = Backbone.View.extend({
 		  model: that.model,
 		}));
 		that.el.issue = that.model;
+		that.$el.droppable({
+		  accept: '.avatar',
+			drop: function(ev, ui) {
+			  that.model.setAssignee($(ev.toElement).attr('data-login'));
+			},
+		});
+		that.$('.avatar').draggable({
+		  stop: function(ev, ui) {
+			  var el = $(ev.target);
+				var top = parseInt(el.css('top'));
+				var left = parseInt(el.css('left'));
+			  if (top * top > 100 || left * left > 100) {
+				  that.model.setAssignee('');
+				}
+			},
+		});
 		return that;
 	},
 

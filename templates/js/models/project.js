@@ -7,7 +7,9 @@ window.Project = Backbone.Model.extend({
 	initialize: function(attrs, opts) {
 	  _.bindAll(this, 'change');
 	  this.issues = new Issues();
+		this.collaborators = new Collaborators();
 		this.listenTo(this.issues, 'reset', this.change);
+		this.listenTo(this.collaborators, 'reset', this.change);
 		this.states = {};
 	},
 
@@ -28,18 +30,23 @@ window.Project = Backbone.Model.extend({
 	parse: function(data) {
 		var that = this;
 		_.each(data.Repositories, function(repo) {
+		  var repoCollaborators = new Collaborators([], { url: 'https://api.github.com/repos/' + repo + '/collaborators' });
+			repoCollaborators.fetch({
+			  success: function() {
+				  that.collaborators.set(repoCollaborators.models, { remove: false, silent: true });
+					that.collaborators.trigger('reset');
+				},
+			});
 		  var repoIssues = new Issues([], { url: 'https://api.github.com/repos/' + repo + '/issues' });
 			repoIssues.fetch({
 			  success: function() {
-				  repoIssues.each(function(issue) {
-					  that.issues.set([issue], { remove: false, silent: true });
-					});
 					that.issues.each(function(issue) {
 					  var parts = repo.split('/');
 					  if (issue.get('user').login == parts[0] && !repoIssues.contains(issue)) {
 						  that.issues.remove(issue, { silent: true });
 						}
 					});
+          that.issues.set(repoIssues.models, { remove: false, silent: true });
 					that.issues.trigger('reset');
 				},
 			});

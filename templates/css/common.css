@@ -10,8 +10,16 @@
 #content {
 	margin-left: 5px;
 }
+.collaborators {
+	display: inline;
+}
+.login-button {
+	display: inline;
+}
 .avatar {
 	height: 42px;
+}
+.issue .avatar {
 	float: left;
 	margin-left: -13px;
 }

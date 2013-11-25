@@ -16,6 +16,7 @@ window.ProjectDetailsView = Backbone.View.extend({
 				path: '/projects/' + that.model.get('Id'),
 			},
 		]);
+		window.session.nav.setCollaborators(that.model.collaborators.models);
 		that.$el.html(that.template({
 		  model: that.model,
 		}));

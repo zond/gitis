@@ -46,6 +46,7 @@ window.ProjectIssuesView = Backbone.View.extend({
 				path: '/projects/' + that.model.get('Id') + '/issues',
 			},
 		]);
+		window.session.nav.setCollaborators(that.model.collaborators.models);
 		that.$el.html(that.template({
 		  model: that.model,
 		}));
@@ -102,7 +103,7 @@ window.ProjectIssuesView = Backbone.View.extend({
 				}
 				var changedState = that.model.updateStates();
 				if (changedState || changedPrio) {
-				  issue.update();
+				  issue.updateBody();
 				}
 			}
 		};

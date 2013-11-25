@@ -53,7 +53,21 @@ window.Issue = Backbone.Model.extend({
 		return parseFloat(match[1]);
 	},
 
-	update: function() {
+	setAssignee: function(a) {
+	  var that = this;
+	  that.set('assignee', a, { silent: true });
+		$.ajax(that.get('url'), {
+		  type: 'PATCH',
+			data: JSON.stringify({
+			  assignee: that.get('assignee'),
+			}),
+			success: function(data) {
+			  that.set(data);
+			},
+		});
+	},
+
+	updateBody: function() {
 		var that = this;
 		$.ajax(that.get('url'), {
 			type: 'PATCH',

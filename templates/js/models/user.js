@@ -25,15 +25,13 @@ window.User = Backbone.Model.extend({
 			var userRepositories = new Repositories([], { url: 'https://api.github.com/user/repos' });
 			userRepositories.fetch({
 				success: function() {
-					userRepositories.each(function(repo) {
-						that.repos.set([repo], { remove: false, silent: true });
-					});
           that.repos.each(function(repo) {
 					  var parts = repo.get('full_name').split('/');
 						if (parts[0] == that.get('login') && !userRepositories.contains(repo)) {
 						  that.repos.remove(repo, { silent: true });
 						}
 					});
+					that.repos.set(userRepositories.models, { remove: false, silent: true });
 					that.repos.trigger('reset');
 				},
 			});
@@ -44,13 +42,13 @@ window.User = Backbone.Model.extend({
 						var orgRepos = new Repositories([], { url: org.get('repos_url') });
 						orgRepos.fetch({
 							success: function() {
-								that.repos.set(orgRepos.models, { remove: false, silent: true });
 								that.repos.each(function(repo) {
 									var parts = repo.get('full_name').split('/');
 									if (parts[0] == org.get('login') && !orgRepos.contains(repo)) {
 										that.repos.remove(repo, { silent: true });
 									}
 								});
+								that.repos.set(orgRepos.models, { remove: false, silent: true });
 								that.repos.trigger('reset');
 							},
 						});
