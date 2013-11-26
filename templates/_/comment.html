@@ -1,4 +1,4 @@
-<%- model.get('body') %>
 <div class="comment-head">
 	<img title="<%- model.get('user').login %>" src="<%- model.get('user').avatar_url %>">
 </div>
+<%= markdown.toHTML(model.get('body')) %>

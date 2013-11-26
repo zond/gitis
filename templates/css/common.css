@@ -7,9 +7,15 @@
 .comments .list-group-item {
 	padding: 1px;
 }
+.comments p {
+	margin: 0px;
+}
 .comment-head img {
 	height: 20px;
 	margin-right: 3px;
+}
+.comment-head {
+	vertical-align: middle;
 }
 .new-comment {
 	width: 100%;

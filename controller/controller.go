@@ -89,6 +89,9 @@ func AllJS(c model.HTTPContext) (err error) {
 	if err = renderText(c, jsTemplates, "bootstrap.min.js"); err != nil {
 		return
 	}
+	if err = renderText(c, jsTemplates, "markdown.min.js"); err != nil {
+		return
+	}
 	if err = render_Templates(c); err != nil {
 		return
 	}

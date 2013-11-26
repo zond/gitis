@@ -40,7 +40,7 @@ window.IssueView = Backbone.View.extend({
 
 	keyupComment: function(ev) {
 	  var that = this;
-		if (ev.keyCode == 13) {
+		if (ev.keyCode == 13 && ev.altKey == false) {
 	    that.model._comments.create({
 			  body: that.$('.new-comment').val(),
 			}, {
