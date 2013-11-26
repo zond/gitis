@@ -7,6 +7,11 @@
 .comments .list-group-item {
 	padding: 1px;
 }
+.label {
+	border-radius: 2px;
+	padding: 1px;
+	margin: 1px;
+}
 .comments p {
 	margin: 0px;
 }

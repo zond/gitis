@@ -130,6 +130,9 @@ window.IssueView = Backbone.View.extend({
 			},
 		});
 		that.$el.attr('id', that.model.fullName());
+		_.each(that.model.get('labels'), function(label) {
+		  that.$('.labels').append('<a href="' + label.url + '" style="background-color: ' + label.color + ';" class="label">' + label.name + '</a>');
+		});
 		return that;
 	},
 

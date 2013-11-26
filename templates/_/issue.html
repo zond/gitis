@@ -1,5 +1,5 @@
 <div class="panel-heading" data-toggle="collapse" href="#collapse-issue-<%- model.get('id') %>">
-	<a class="gitlink" target="_" href="<%- model.get('html_url') %>"><small><%- model.fullName() %></small></a>
+	<a class="gitlink" target="_" href="<%- model.get('html_url') %>"><small><%- model.fullName() %></small></a><span class="labels"></span>
 	<% if (assignee != null) { %>
 	<img title="<%- assignee.login %>" data-login="<%- assignee.login %>" class="avatar" src="<%= assignee.avatar_url %>">
 	<% } %>
