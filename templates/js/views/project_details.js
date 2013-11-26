@@ -1,11 +1,11 @@
-window.ProjectDetailsView = Backbone.View.extend({
+window.ProjectDetailsView = BaseView.extend({
 
 	template: _.template($('#project_details_underscore').html()),
 
 	initialize: function() {
-	  _.bindAll(this, 'render');
-		this.listenTo(this.model, 'change', this.render);
-		this.listenTo(window.session.user, 'change', this.render);
+	  _.bindAll(this, 'doRender');
+		this.listenTo(this.model, 'change', this.doRender);
+		this.listenTo(window.session.user, 'change', this.doRender);
 	},
 
 	render: function() {

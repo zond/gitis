@@ -1,4 +1,4 @@
-window.TopNavigationView = Backbone.View.extend({
+window.TopNavigationView = BaseView.extend({
 
 	template: _.template($('#top_navigation_underscore').html()),
 

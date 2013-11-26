@@ -1,4 +1,4 @@
-window.ProjectIssuesView = Backbone.View.extend({
+window.ProjectIssuesView = BaseView.extend({
 
 	template: _.template($('#project_issues_underscore').html()),
 
@@ -8,8 +8,8 @@ window.ProjectIssuesView = Backbone.View.extend({
 	},
 
 	initialize: function() {
-	  _.bindAll(this, 'render');
-		this.listenTo(this.model, 'change', this.render);
+	  _.bindAll(this, 'doRender');
+		this.listenTo(this.model, 'change', this.doRender);
 		this.ignores = 0;
 	},
 
@@ -59,25 +59,25 @@ window.ProjectIssuesView = Backbone.View.extend({
 				  project: that.model,
 					parent: that,
 				  model: issue,
-				}).render().el);
+				}).doRender().el);
 			} else if (state == 'Doing') {
 			  that.$('.doing-issues').append(new IssueView({
 				  project: that.model,
 					parent: that,
 				  model: issue,
-				}).render().el);
+				}).doRender().el);
 			} else if (state == 'Done') {
 			  that.$('.done-issues').append(new IssueView({
 				  project: that.model,
 					parent: that,
 				  model: issue,
-				}).render().el);
+				}).doRender().el);
 			} else if (state == 'Backlog') {
 			  that.$('.backlog-issues').append(new IssueView({
 				  project: that.model,
 					parent: that,
 				  model: issue,
-				}).render().el);
+				}).doRender().el);
 			}
 		});
 		var updateFunc = function(ev, ui) {

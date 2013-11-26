@@ -1,4 +1,4 @@
-window.IssueView = Backbone.View.extend({
+window.IssueView = BaseView.extend({
 
 	template: _.template($('#issue_underscore').html()),
 
@@ -13,11 +13,11 @@ window.IssueView = Backbone.View.extend({
 	},
 
 	initialize: function(options) {
-	  _.bindAll(this, 'render');
+	  _.bindAll(this, 'doRender');
 		this.project = options.project;
 		this.parent = options.parent;
-		this.listenTo(this.model, 'change', this.render);
-		this.listenTo(this.project, 'updated_states', this.render);
+		this.listenTo(this.model, 'change', this.doRender);
+		this.listenTo(this.project, 'updated_states', this.doRender);
 		this.expanded = false;
 		this.shownComments = false;
 	},
@@ -27,11 +27,13 @@ window.IssueView = Backbone.View.extend({
 		if (!that.shownComments) {
 		  that.$('.glyphicon-repeat').removeClass('hidden');
 		  that.model.comments(function(coms) {
-				that.$('.glyphicon-repeat').addClass('hidden');
-				coms.each(function(com) {
-					that.$('.comment-list').append(new CommentView({
-					  model: com,
-					}).render().el);
+			  that.renderWithin(function() {
+					that.$('.glyphicon-repeat').addClass('hidden');
+					coms.each(function(com) {
+						that.$('.comment-list').append(new CommentView({
+							model: com,
+						}).doRender().el);
+					});
 				});
 			});
 		}
@@ -46,9 +48,11 @@ window.IssueView = Backbone.View.extend({
 			}, {
 			  success: function(com) {
 					that.$('.new-comment').val('');
-					that.$('.comment-list').append(new CommentView({
-					  model: com,
-					}).render().el);
+					that.renderWithin(function() {
+						that.$('.comment-list').append(new CommentView({
+							model: com,
+						}).doRender().el);
+					});
 				},
 			});
 		}

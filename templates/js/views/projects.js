@@ -1,4 +1,4 @@
-window.ProjectsView = Backbone.View.extend({
+window.ProjectsView = BaseView.extend({
 
 	template: _.template($('#projects_underscore').html()),
 
@@ -7,12 +7,12 @@ window.ProjectsView = Backbone.View.extend({
 	},
 	
 	initialize: function() {
-	  _.bindAll(this, 'render');
+	  _.bindAll(this, 'doRender');
 		this.collection = new Projects();
-		this.listenTo(window.session.user, 'change', this.render);
-		this.listenTo(this.collection, 'reset', this.render);
-		this.listenTo(this.collection, 'add', this.render);
-		this.listenTo(this.collection, 'remove', this.render);
+		this.listenTo(window.session.user, 'change', this.doRender);
+		this.listenTo(this.collection, 'reset', this.doRender);
+		this.listenTo(this.collection, 'add', this.doRender);
+		this.listenTo(this.collection, 'remove', this.doRender);
 		this.collection.fetch({ reset: true });
 	},
 

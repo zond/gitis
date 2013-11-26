@@ -1,4 +1,4 @@
-window.ProjectView = Backbone.View.extend({
+window.ProjectView = BaseView.extend({
 
 	template: _.template($('#project_underscore').html()),
 
@@ -11,8 +11,8 @@ window.ProjectView = Backbone.View.extend({
 	},
 
 	initialize: function() {
-	  _.bindAll(this, 'render');
-		this.listenTo(this.model, 'change', this.render);
+	  _.bindAll(this, 'doRender');
+		this.listenTo(this.model, 'change', this.doRender);
 	},
 
 	removeProject: function(ev) {
@@ -22,17 +22,19 @@ window.ProjectView = Backbone.View.extend({
 
 	showProject: function(ev) {
 	  ev.preventDefault();
-		window.session.router.render(new ProjectDetailsView({
+		new ProjectDetailsView({
+		  el: $('#content'),
 			model: this.model,
-		}));
+		}).doRender();
 		this.remove();
 	},
 
 	showIssues: function(ev) {
 	  ev.preventDefault();
-		window.session.router.render(new ProjectIssuesView({
+		new ProjectIssuesView({
+		  el: $('#content'),
 			model: this.model,
-		}));
+		}).doRender();
 		this.remove();
 	},
 

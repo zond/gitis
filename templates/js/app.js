@@ -2,7 +2,7 @@
 window.session = {};
 
 $(window).load(function() {
-  
+
 	$(document).on('click', 'a.navigate', function(ev) {
 	  ev.preventDefault();
 	  window.session.router.navigate($(ev.target).attr('href'), { trigger: true });
@@ -10,16 +10,6 @@ $(window).load(function() {
 
 	var AppRouter = Backbone.Router.extend({
 	
-		currentView: null,
-
-		render: function(view) {
-			if (this.currentView != null) {
-			  this.currentView.remove();
-			}
-			$('#content').append(view.render().el);
-			this.currentView = view;
-		},
-
 		routes: {
 			"projects/:id/issues": "showIssues",
 			"projects/:id": "showProject",
@@ -28,7 +18,9 @@ $(window).load(function() {
 		},
 
 		projects: function() {
-		  this.render(new ProjectsView({}));
+		  new ProjectsView({
+			  el: $('#content'),
+			});
 		},
 
 		showIssues: function(id) {
@@ -36,9 +28,10 @@ $(window).load(function() {
 		  var project = new Project({ Id: id });
 			project.fetch({
 			  success: function() {
-					that.render(new ProjectIssuesView({
+					new ProjectIssuesView({
+					  el: $('#content'),
 					  model: project,
-					}));
+					});
 				},
 			});
 		},
@@ -48,9 +41,10 @@ $(window).load(function() {
 		  var project = new Project({ Id: id });
 			project.fetch({
 			  success: function() {
-					that.render(new ProjectDetailsView({
+					new ProjectDetailsView({
+					  el: $('#content'),
 					  model: project,
-					}));
+					});
 				},
 			});
 		},
@@ -120,7 +114,7 @@ $(window).load(function() {
 
 	window.session.nav = new TopNavigationView({
 		el: $('nav'),
-	}).render();
+	}).doRender();
 
 	window.session.router = new AppRouter();
 	Backbone.history.start({ 
