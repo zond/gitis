@@ -9,6 +9,7 @@ window.IssueView = Backbone.View.extend({
 		"show.bs.collapse .comments": 'showComments',
 		"show.bs.collapse": 'expand',
 		"hide.bs.collapse": 'collapse',
+		"keyup .new-comment": 'keyupComment',
 	},
 
 	initialize: function(options) {
@@ -35,6 +36,22 @@ window.IssueView = Backbone.View.extend({
 			});
 		}
 		that.shownComments = true;
+	},
+
+	keyupComment: function(ev) {
+	  var that = this;
+		if (ev.keyCode == 13) {
+	    that.model._comments.create({
+			  body: that.$('.new-comment').val(),
+			}, {
+			  success: function(com) {
+					that.$('.new-comment').val('');
+					that.$('.comment-list').append(new CommentView({
+					  model: com,
+					}).render().el);
+				},
+			});
+		}
 	},
 
 	gitlink: function(ev) {

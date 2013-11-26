@@ -1,6 +1,22 @@
 .comment-list {
 	margin-bottom: 0px;
 }
+.comments .panel-body {
+	padding: 0px;
+}
+.comments .list-group-item {
+	padding: 1px;
+}
+.comment-head img {
+	height: 20px;
+	margin-right: 3px;
+}
+.new-comment {
+	width: 100%;
+}
+.comment-head {
+	float: left;
+}
 .bordered {
 	border: 1px dotted black;
 }

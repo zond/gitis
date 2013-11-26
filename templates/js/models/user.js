@@ -15,13 +15,13 @@ window.User = Backbone.Model.extend({
 	},
 
 	loggedIn: function() {
-		return !!this.get('AccessToken');
+		return !!this.get('access_token');
 	},
 
 	parse: function(data) {
 		var that = this;
-		if (!!data.AccessToken) {
-		  that.set('AccessToken', data.AccessToken, { silent: true });
+		if (!!data.access_token) {
+		  that.set('access_token', data.access_token, { silent: true });
 			var userRepositories = new Repositories([], { url: 'https://api.github.com/user/repos' });
 			userRepositories.fetch({
 				success: function() {

@@ -2,10 +2,12 @@ package model
 
 import (
 	"appengine/urlfetch"
+	"bytes"
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"github.com/soundtrackyourbrand/utils/gae/gaecontext"
+	"io"
 	"net/http"
 )
 
@@ -14,10 +16,10 @@ func init() {
 }
 
 type User struct {
-	AccessToken string
-	AvatarUrl   string
-	Login       string
-	Id          int
+	AccessToken string `json:"access_token"`
+	AvatarUrl   string `json:"avatar_url"`
+	Login       string `json:"login"`
+	Id          int    `json:"id"`
 }
 
 func (self *User) Load(c gaecontext.GAEContext) (err error) {
@@ -35,5 +37,8 @@ func (self *User) Load(c gaecontext.GAEContext) (err error) {
 		err = fmt.Errorf("Got %v from %+v", resp, req)
 		return
 	}
-	return json.NewDecoder(resp.Body).Decode(self)
+	buf := &bytes.Buffer{}
+	io.Copy(buf, resp.Body)
+	c.Infof("### got\n%v", buf.String())
+	return json.NewDecoder(buf).Decode(self)
 }
